@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Force dark theme globally */
+:root {
+  --background: #09090b;
+  --foreground: #ececee;
+  --card: #121214;
+  --card-foreground: #ececee;
+  --primary: #6e6aed;
+  --primary-foreground: #ffffff;
+  --secondary: #18181b;
+  --secondary-foreground: #ececee;
+  --muted: #1c1c21;
+  --muted-foreground: #8b8b93;
+  --accent: #242429;
+  --accent-foreground: #ececee;
+  --border: #27272a;
+  --ring: #6e6aed;
+  --radius: 0.5rem;
+}
+
+.dashboard-shell {
+  --background: #09090b;
+  --foreground: #ececee;
+  --card: #121214;
+  --card-foreground: #ececee;
+  --primary: #6e6aed;
+  --primary-foreground: #ffffff;
+  --secondary: #18181b;
+  --secondary-foreground: #ececee;
+  --muted: #1c1c21;
+  --muted-foreground: #8b8b93;
+  --accent: #242429;
+  --accent-foreground: #ececee;
+  --border: #27272a;
+  --ring: #6e6aed;
+  --radius: 0.5rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Clerk UI visibility fixes: ensure text and inputs are visible in dark theme */
+/* Targets common Clerk root/iframe wrappers and falls back to generic selectors. */
+[data-clerk], .clerk, .clerk-root, .clerk-card, .clerk-modal {
+  color: var(--foreground) !important;
+}
+
+[data-clerk] a, .clerk a, [data-clerk] button, .clerk button {
+  color: var(--foreground) !important;
+}
+
+[data-clerk] input, .clerk input, [data-clerk] textarea, .clerk textarea {
+  color: var(--foreground) !important;
+  background: rgba(255,255,255,0.02) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+[data-clerk] ::placeholder, .clerk ::placeholder {
+  color: var(--muted-foreground) !important;
+  opacity: 1 !important;
+}
+
+/* OTP inputs and small menu items sometimes use specific classes; these selectors help cover them. */
+.clerk-otp-input, .clerk-otp-field, [data-clerk] .clerk-otp-input, [data-clerk] .clerk-otp-field {
+  color: var(--foreground) !important;
+  background: rgba(255,255,255,0.03) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+
+/* Ensure user menu items (Manage account / Sign out) are readable */
+[data-clerk] .clerk-user-menu-item, .clerk-user-menu-item, [data-clerk] .clerk__item, .clerk__item {
+  color: var(--foreground) !important;
+}
+
+
