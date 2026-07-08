@@ -623,7 +623,7 @@ export default function SettingsPage() {
                         <select
                           value={selectedProvider}
                           onChange={(e) => setSelectedProvider(e.target.value)}
-                          className="w-full rounded-lg border border-border bg-zinc-950 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                         >
                           <option value="openai">OpenAI (GPT-4o-mini)</option>
                           <option value="groq">Groq (Llama 3.3)</option>
@@ -639,7 +639,7 @@ export default function SettingsPage() {
                           value={apiKeyInput}
                           onChange={(e) => setApiKeyInput(e.target.value)}
                           placeholder={`Enter your ${selectedProvider.toUpperCase()} key`}
-                          className="w-full rounded-lg border border-border bg-zinc-950 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                         />
                         {savedProviders.includes(selectedProvider) && (
                           <p className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
@@ -681,8 +681,8 @@ export default function SettingsPage() {
                               isActive
                                 ? "bg-indigo-600/5 border-indigo-500/30"
                                 : isSaved
-                                  ? "bg-zinc-900/40 border-border/40"
-                                  : "bg-zinc-950/20 border-border/20 opacity-60"
+                                  ? "bg-muted/40 border-border/40"
+                                  : "bg-background/20 border-border/20 opacity-60"
                             }`}
                           >
                             <div>
@@ -699,14 +699,14 @@ export default function SettingsPage() {
                                 ) : null}
                               </div>
                               <span className="text-[10px] text-muted-foreground mt-0.5 block">
-                                Model: <code className="text-foreground/80 font-mono text-[9px] bg-zinc-900 px-1 py-0.5 rounded">{provider.model}</code>
+                                Model: <code className="text-foreground/80 font-mono text-[9px] bg-muted px-1 py-0.5 rounded">{provider.model}</code>
                               </span>
                             </div>
 
                             {isSaved && !isActive && (
                               <button
                                 onClick={() => handleSetActiveProvider(provider.id)}
-                                className="px-2.5 py-1 text-[10px] font-bold rounded bg-zinc-800 hover:bg-zinc-700 text-foreground transition-all cursor-pointer"
+                                className="px-2.5 py-1 text-[10px] font-bold rounded bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all cursor-pointer"
                               >
                                 Activate
                               </button>
@@ -779,7 +779,7 @@ export default function SettingsPage() {
       {/* Confirmation Dialog Modal */}
       {showDeleteModal && workspace && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-xl border border-rose-500/30 bg-zinc-950 p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full max-w-md rounded-xl border border-rose-500/30 bg-background p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-2 text-rose-400">
               <ShieldAlert className="h-5 w-5 shrink-0" />
               <h3 className="font-bold text-md text-foreground">Are you absolutely sure?</h3>
@@ -787,7 +787,7 @@ export default function SettingsPage() {
             
             <p className="text-xs text-muted-foreground leading-relaxed">
               This operation is <span className="font-bold text-rose-400">irreversible</span>. It will permanently delete 
-              the <span className="font-bold text-foreground">&quot;{workspace.name}&quot;</span> workspace and destroy all projects, boards, 
+              the &quot;{workspace.name}&quot; workspace and destroy all projects, boards, 
               members list, and task metrics.
             </p>
 
@@ -811,7 +811,7 @@ export default function SettingsPage() {
                   setShowDeleteModal(false);
                   setDeleteConfirmText("");
                 }}
-                className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-zinc-800 text-muted-foreground hover:bg-zinc-700 hover:text-foreground transition-all cursor-pointer"
+                className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all cursor-pointer"
               >
                 Cancel
               </button>

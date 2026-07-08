@@ -107,7 +107,7 @@ export function SidebarContent({ onNavigate, className }: SidebarContentProps) {
         {dropdownOpen && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
-            <div className="absolute left-3 right-3 top-full z-20 mt-1 rounded-lg border border-border/60 bg-zinc-950 p-1.5 shadow-xl animate-in fade-in slide-in-from-top-1 duration-150">
+            <div className="absolute left-3 right-3 top-full z-20 mt-1 rounded-lg border border-border/60 bg-background p-1.5 shadow-xl animate-in fade-in slide-in-from-top-1 duration-150">
               <p className="px-2.5 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 Switch Workspace
               </p>

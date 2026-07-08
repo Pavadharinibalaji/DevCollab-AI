@@ -79,8 +79,8 @@ function MessageBubble({ msg }: { msg: Message }) {
     >
       {/* Avatar */}
       {!isUser && (
-        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#6e6aed]/20 ring-1 ring-[#6e6aed]/40">
-          <Bot className="h-3.5 w-3.5 text-[#6e6aed]" />
+        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/20 ring-1 ring-primary/40">
+          <Bot className="h-3.5 w-3.5 text-primary" />
         </div>
       )}
 
@@ -89,8 +89,8 @@ function MessageBubble({ msg }: { msg: Message }) {
         className={cn(
           "relative max-w-[82%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed",
           isUser
-            ? "rounded-tr-sm bg-[#6e6aed] text-white"
-            : "rounded-tl-sm bg-[#1c1c21] text-[#ececee] ring-1 ring-[#27272a]"
+            ? "rounded-tr-sm bg-primary text-primary-foreground"
+            : "rounded-tl-sm bg-muted text-foreground ring-1 ring-border"
         )}
       >
         {isUser ? (
@@ -106,7 +106,7 @@ function MessageBubble({ msg }: { msg: Message }) {
         {!isUser && (
           <button
             onClick={copyText}
-            className="absolute -right-7 top-1 hidden rounded-md p-1 text-[#8b8b93] hover:bg-[#242429] hover:text-[#ececee] group-hover:flex"
+            className="absolute -right-7 top-1 hidden rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground group-hover:flex"
           >
             {copied ? (
               <Check className="h-3 w-3 text-emerald-400" />
@@ -124,14 +124,14 @@ function MessageBubble({ msg }: { msg: Message }) {
 function TypingDots() {
   return (
     <div className="flex gap-2 px-3">
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#6e6aed]/20 ring-1 ring-[#6e6aed]/40">
-        <Bot className="h-3.5 w-3.5 text-[#6e6aed]" />
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/20 ring-1 ring-primary/40">
+        <Bot className="h-3.5 w-3.5 text-primary" />
       </div>
-      <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-[#1c1c21] px-4 py-3 ring-1 ring-[#27272a]">
+      <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm bg-muted px-4 py-3 ring-1 ring-border">
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="inline-block h-1.5 w-1.5 rounded-full bg-[#6e6aed]/70 animate-bounce"
+            className="inline-block h-1.5 w-1.5 rounded-full bg-primary/70 animate-bounce"
             style={{ animationDelay: `${i * 0.15}s` }}
           />
         ))}
@@ -289,16 +289,15 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
 
   return (
     <>
-      {/* ---------- Floating trigger button ---------- */}
+      {/* ---------- Floating Chat button ---------- */}
       <button
         onClick={() => setOpen((o) => !o)}
-        aria-label="Open DevBot"
         className={cn(
-          "fixed bottom-5 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg shadow-[#6e6aed]/30 transition-all duration-300",
+          "fixed bottom-5 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg shadow-primary/30 transition-all duration-300",
           isAgentOpen ? "right-[calc(18%+1.25rem)]" : "right-5",
           open
-            ? "bg-[#242429] ring-1 ring-[#27272a] text-[#ececee] scale-95"
-            : "bg-[#6e6aed] text-white hover:bg-[#5b57d6] hover:scale-105"
+            ? "bg-accent ring-1 ring-border text-foreground scale-95"
+            : "bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105"
         )}
       >
         {open ? (
@@ -319,7 +318,7 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
       {open && (
         <div
           className={cn(
-            "fixed bottom-20 z-50 flex flex-col overflow-hidden rounded-2xl border border-[#27272a] bg-[#121214] shadow-2xl shadow-black/50 transition-all duration-300",
+            "fixed bottom-20 z-50 flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/50 transition-all duration-300",
             isAgentOpen ? "right-[calc(18%+1.25rem)]" : "right-5",
             expanded
               ? "h-[min(680px,80vh)] w-[min(520px,calc(100vw-2rem))]"
@@ -328,13 +327,13 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
           style={{ animation: "devbot-slide-up 0.2s ease" }}
         >
           {/* Header */}
-          <div className="flex shrink-0 items-center gap-2.5 border-b border-[#27272a] bg-[#121214] px-4 py-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6e6aed]/15 ring-1 ring-[#6e6aed]/30">
-              <Sparkles className="h-4 w-4 text-[#6e6aed]" />
+          <div className="flex shrink-0 items-center gap-2.5 border-b border-border bg-card px-4 py-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 ring-1 ring-primary/30">
+              <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-semibold text-[#ececee]">DevBot</p>
-              <p className="text-[11px] text-[#8b8b93]">
+              <p className="text-[13px] font-semibold text-foreground">DevBot</p>
+              <p className="text-[11px] text-muted-foreground">
                 {streaming ? (
                   <span className="flex items-center gap-1">
                     <Loader2 className="h-2.5 w-2.5 animate-spin" /> Thinking…
@@ -348,14 +347,14 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
               <button
                 onClick={reset}
                 title="Clear chat"
-                className="rounded-md p-1.5 text-[#8b8b93] hover:bg-[#242429] hover:text-[#ececee] transition-colors"
+                className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={() => setExpanded((e) => !e)}
                 title={expanded ? "Shrink" : "Expand"}
-                className="rounded-md p-1.5 text-[#8b8b93] hover:bg-[#242429] hover:text-[#ececee] transition-colors"
+                className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
                 {expanded ? (
                   <Minimize2 className="h-3.5 w-3.5" />
@@ -366,7 +365,7 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
               <button
                 onClick={() => setOpen(false)}
                 title="Close"
-                className="rounded-md p-1.5 text-[#8b8b93] hover:bg-[#242429] hover:text-[#ececee] transition-colors"
+                className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -377,14 +376,14 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
           <div className="flex flex-1 flex-col gap-3 overflow-y-auto py-4 scroll-smooth">
             {isEmpty ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-5 px-4 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#6e6aed]/10 ring-1 ring-[#6e6aed]/20">
-                  <Bot className="h-7 w-7 text-[#6e6aed]" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+                  <Bot className="h-7 w-7 text-primary" />
                 </div>
                 <div>
-                  <p className="text-[14px] font-semibold text-[#ececee]">
+                  <p className="text-[14px] font-semibold text-foreground">
                     Hey, I&apos;m DevBot 👋
                   </p>
-                  <p className="mt-1 text-[12px] text-[#8b8b93] leading-relaxed max-w-[240px]">
+                  <p className="mt-1 text-[12px] text-muted-foreground leading-relaxed max-w-[240px]">
                     Ask me anything about DevCollab, coding, or your projects.
                   </p>
                 </div>
@@ -393,7 +392,7 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
                     <button
                       key={s}
                       onClick={() => sendMessage(s)}
-                      className="rounded-xl border border-[#27272a] bg-[#1c1c21] px-3 py-2 text-left text-[12px] text-[#ececee] hover:bg-[#242429] hover:border-[#6e6aed]/40 transition-colors"
+                      className="rounded-xl border border-border bg-muted px-3 py-2 text-left text-[12px] text-foreground hover:bg-accent hover:border-primary/40 transition-colors"
                     >
                       {s}
                     </button>
@@ -414,27 +413,26 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
           </div>
 
           {/* Input */}
-          <div className="shrink-0 border-t border-[#27272a] bg-[#121214] p-3">
-            <div className="flex items-end gap-2 rounded-xl border border-[#27272a] bg-[#1c1c21] px-3 py-2 ring-[#6e6aed]/40 focus-within:border-[#6e6aed]/50 focus-within:ring-1 transition-all">
+          <div className="shrink-0 border-t border-border bg-card p-3">
+            <div className="flex items-end gap-2 rounded-xl border border-border bg-muted px-3 py-2 ring-primary/40 focus-within:border-primary/50 focus-within:ring-1 transition-all">
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask DevBot anything…"
-                rows={1}
                 disabled={streaming}
-                className="flex-1 resize-none bg-transparent text-[13px] text-[#ececee] placeholder:text-[#8b8b93] outline-none leading-relaxed max-h-28 disabled:opacity-50"
-                style={{ scrollbarWidth: "none" }}
+                placeholder={streaming ? "Thinking..." : "Ask DevBot a question…"}
+                className="flex-1 resize-none bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground outline-none leading-relaxed max-h-28 disabled:opacity-50"
+                rows={1}
               />
               <button
                 onClick={() => sendMessage(input)}
-                disabled={!input.trim() || streaming}
+                disabled={streaming || !input.trim()}
                 className={cn(
                   "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all",
-                  input.trim() && !streaming
-                    ? "bg-[#6e6aed] text-white hover:bg-[#5b57d6]"
-                    : "bg-[#242429] text-[#8b8b93] cursor-not-allowed"
+                  input.trim()
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "bg-accent text-muted-foreground cursor-not-allowed"
                 )}
               >
                 {streaming ? (
@@ -444,7 +442,7 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
                 )}
               </button>
             </div>
-            <p className="mt-1.5 text-center text-[10px] text-[#8b8b93]">
+            <p className="mt-1.5 text-center text-[10px] text-muted-foreground">
               Powered by Claude · Enter to send · Shift+Enter for newline
             </p>
           </div>
@@ -462,8 +460,8 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
           margin: 6px 0;
           padding: 10px 12px;
           border-radius: 8px;
-          background: #09090b;
-          border: 1px solid #27272a;
+          background: var(--background);
+          border: 1px solid var(--border);
           overflow-x: auto;
           font-size: 12px;
         }
@@ -471,8 +469,8 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
         .devbot-inline-code {
           padding: 1px 5px;
           border-radius: 4px;
-          background: #09090b;
-          border: 1px solid #27272a;
+          background: var(--background);
+          border: 1px solid var(--border);
           font-family: 'JetBrains Mono', monospace;
           font-size: 11.5px;
           color: #a78bfa;

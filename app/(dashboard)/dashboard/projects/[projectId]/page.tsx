@@ -621,7 +621,7 @@ export default function ProjectDetailPage() {
       {/* Project Delete Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-xl border border-rose-500/30 bg-zinc-950 p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full max-w-md rounded-xl border border-rose-500/30 bg-background p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-2 text-rose-400">
               <ShieldAlert className="h-5 w-5 shrink-0" />
               <h3 className="font-bold text-md text-foreground">Delete Project?</h3>
@@ -652,7 +652,7 @@ export default function ProjectDetailPage() {
                   setShowDeleteModal(false);
                   setDeleteConfirmText("");
                 }}
-                className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-zinc-800 text-muted-foreground hover:bg-zinc-700 hover:text-foreground transition-all cursor-pointer"
+                className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all cursor-pointer"
               >
                 Cancel
               </button>

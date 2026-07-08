@@ -179,24 +179,24 @@ export default function AgentSidebar() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-neutral-950 border-neutral-900 text-neutral-100 antialiased selection:bg-purple-600/30 selection:text-white min-w-0">
+    <div className="flex flex-col h-full bg-background border-border text-foreground antialiased selection:bg-purple-600/30 selection:text-white min-w-0">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-neutral-900/80 bg-neutral-950/40 backdrop-blur-md sticky top-0 z-10 shrink-0">
+      <div className="flex items-center justify-between p-3 border-b border-border/80 bg-background/40 backdrop-blur-md sticky top-0 z-10 shrink-0">
         <div className="flex items-center gap-1.5 min-w-0">
           <div className="relative shrink-0">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-900/20">
               <Bot className="w-3.5 h-3.5 text-white" />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border-2 border-neutral-950 animate-pulse" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border-2 border-background animate-pulse" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-              <span className="font-semibold text-xs tracking-wide text-neutral-100 truncate">
+              <span className="font-semibold text-xs tracking-wide text-foreground truncate">
                 Agent
               </span>
               <Sparkles className="w-2.5 h-2.5 text-purple-400 shrink-0" />
             </div>
-            <span className="text-[9px] text-neutral-500 font-medium tracking-wider uppercase block truncate">
+            <span className="text-[9px] text-muted-foreground font-medium tracking-wider uppercase block truncate">
               {activeProvider ? `${activeProvider} Agent` : "AI Agent"}
             </span>
           </div>
@@ -208,7 +208,7 @@ export default function AgentSidebar() {
             size="icon"
             onClick={clearChat}
             disabled={isLoading}
-            className="w-7 h-7 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-neutral-900 transition-colors shrink-0"
+            className="w-7 h-7 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-accent transition-colors shrink-0"
             title="Clear conversation"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -224,10 +224,10 @@ export default function AgentSidebar() {
               <KeyRound className="w-5 h-5 text-purple-400" />
             </div>
             <div className="space-y-1.5 px-2">
-              <h3 className="font-semibold text-neutral-200 tracking-wide text-xs">
+              <h3 className="font-semibold text-foreground tracking-wide text-xs">
                 Add API key to use AI
               </h3>
-              <p className="text-[11px] text-neutral-400 leading-normal">
+              <p className="text-[11px] text-muted-foreground leading-normal">
                 Save an API key (OpenAI, Groq, Anthropic, Gemini) in settings to enable project-aware assistance.
               </p>
             </div>
@@ -244,17 +244,17 @@ export default function AgentSidebar() {
               <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
             </div>
             <div className="space-y-1.5 px-2">
-              <h3 className="font-semibold text-neutral-200 tracking-wide text-xs">
+              <h3 className="font-semibold text-foreground tracking-wide text-xs">
                 Collaborative AI Assistant
               </h3>
-              <p className="text-[11px] text-neutral-400 leading-normal">
+              <p className="text-[11px] text-muted-foreground leading-normal">
                 I can help with your current project context and tasks.
               </p>
             </div>
 
             {/* Quick Actions */}
             <div className="w-full pt-2 space-y-2 px-1">
-              <div className="text-left text-[9px] font-semibold text-neutral-500 uppercase tracking-wider pl-1">
+              <div className="text-left text-[9px] font-semibold text-muted-foreground uppercase tracking-wider pl-1">
                 Suggested Topics
               </div>
               {QUICK_ACTIONS.map((action, i) => {
@@ -264,12 +264,12 @@ export default function AgentSidebar() {
                     key={i}
                     onClick={() => handleQuickAction(action.prompt)}
                     className={cn(
-                      "w-full text-left p-2.5 rounded-xl border text-[11px] transition-all duration-200 flex items-start gap-2 hover:scale-[1.01] hover:border-neutral-700/80 hover:bg-neutral-900/60 active:scale-[0.99] min-w-0",
+                      "w-full text-left p-2.5 rounded-xl border text-[11px] transition-all duration-200 flex items-start gap-2 hover:scale-[1.01] hover:border-border hover:bg-accent/60 active:scale-[0.99] min-w-0",
                       action.color,
                     )}
                   >
                     <Icon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                    <span className="font-medium text-neutral-300 group-hover:text-white leading-tight truncate">
+                    <span className="font-medium text-muted-foreground group-hover:text-foreground leading-tight truncate">
                       {action.label}
                     </span>
                   </button>
@@ -297,7 +297,7 @@ export default function AgentSidebar() {
                     className={cn(
                       "w-6 h-6 rounded-md shrink-0 flex items-center justify-center border shadow-sm",
                       isUser
-                        ? "bg-neutral-900 border-neutral-800 text-purple-400"
+                        ? "bg-accent border-border text-purple-400"
                         : "bg-gradient-to-tr from-purple-600 to-indigo-600 border-transparent text-white",
                     )}
                   >
@@ -310,12 +310,12 @@ export default function AgentSidebar() {
                       className={cn(
                         "p-2.5 text-xs rounded-xl leading-relaxed whitespace-pre-wrap shadow-sm break-words",
                         isUser
-                          ? "bg-gradient-to-tr from-purple-600 to-indigo-600 text-white rounded-tr-none"
-                          : "bg-neutral-900/80 border border-neutral-800/80 text-neutral-200 rounded-tl-none",
+                          ? "bg-primary/10 border-primary/20 text-indigo-400"
+                          : "bg-muted/80 border border-border/80 text-foreground rounded-tl-none",
                       )}
                     >
                       {isEmptyAssistant && isLoading && isLast ? (
-                        <div className="flex items-center gap-1.5 text-neutral-400 py-0.5 px-0.5">
+                        <div className="flex items-center gap-1.5 text-muted-foreground py-0.5 px-0.5">
                           <Loader2 className="w-3 h-3 animate-spin text-purple-400 shrink-0" />
                           <span className="text-[10px] font-medium tracking-wide">
                             Thinking...
@@ -340,9 +340,9 @@ export default function AgentSidebar() {
           e.preventDefault();
           sendMessage();
         }}
-        className="p-3 border-t border-neutral-900 bg-neutral-950 shrink-0"
+        className="p-3 border-t border-border bg-background shrink-0"
       >
-        <div className="relative flex items-center bg-neutral-900/60 border border-neutral-800/80 rounded-xl focus-within:ring-2 focus-within:ring-purple-600/40 focus-within:border-purple-500 transition-all duration-200 pl-2.5 pr-1.5 py-1.5 gap-2 min-w-0">
+        <div className="relative flex items-center bg-muted/60 border border-border/80 rounded-xl focus-within:ring-2 focus-within:ring-purple-600/40 focus-within:border-purple-500 transition-all duration-200 pl-2.5 pr-1.5 py-1.5 gap-2 min-w-0">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -354,7 +354,7 @@ export default function AgentSidebar() {
                   ? "Thinking..."
                   : "Type..."
             }
-            className="flex-1 min-w-0 bg-transparent text-xs text-neutral-100 placeholder-neutral-500 focus:outline-none disabled:opacity-50"
+            className="flex-1 min-w-0 bg-transparent text-xs text-foreground placeholder-muted-foreground focus:outline-none disabled:opacity-50"
           />
 
           <Button
@@ -365,7 +365,7 @@ export default function AgentSidebar() {
               "w-7 h-7 rounded-lg shrink-0 transition-all duration-200 flex items-center justify-center",
               input.trim()
                 ? "bg-purple-600 text-white hover:bg-purple-500 active:scale-95 shadow-md shadow-purple-900/25"
-                : "bg-neutral-800 text-neutral-500 cursor-not-allowed",
+                : "bg-accent text-muted-foreground cursor-not-allowed",
             )}
           >
             {isLoading ? (
