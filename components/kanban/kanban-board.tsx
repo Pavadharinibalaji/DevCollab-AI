@@ -471,16 +471,17 @@ export function KanbanBoard() {
           onDragEnd={onDragEnd}
           onDragCancel={onDragCancel}
         >
-          <div className="grid min-h-[min(70vh,720px)] grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="flex flex-row overflow-x-auto gap-4 min-h-[min(70vh,720px)] pb-4 select-none">
             {KANBAN_COLUMN_IDS.map((columnId) => (
-              <KanbanColumn
-                key={columnId}
-                columnId={columnId}
-                taskIds={columns[columnId] || []}
-                tasks={tasks}
-                onTaskClick={handleOpenTaskDetails}
-                onAddTaskClick={handleOpenAddTask}
-              />
+              <div key={columnId} className="w-[280px] sm:w-[320px] lg:flex-1 shrink-0 flex flex-col min-w-0">
+                <KanbanColumn
+                  columnId={columnId}
+                  taskIds={columns[columnId] || []}
+                  tasks={tasks}
+                  onTaskClick={handleOpenTaskDetails}
+                  onAddTaskClick={handleOpenAddTask}
+                />
+              </div>
             ))}
           </div>
 

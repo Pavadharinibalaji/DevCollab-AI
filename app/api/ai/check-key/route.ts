@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectMongoose } from "@/lib/db/mongoose";
 import { getCurrentMongoUser } from "@/lib/server/auth/getCurrentMongoUser";
-import { UserKeyModel } from "@/models/UserKey";
+import { UserKeyModel } from "@/lib/db/models";
 
 export const runtime = "nodejs";
 
@@ -9,12 +9,12 @@ export async function GET() {
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     const conn = await connectMongoose();
     if (!conn) {
-      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
+      return NextResponse.json({ success: false, data: null, error: "Database connection failed" }, { status: 500 });
     }
 
     const keyDocs = await UserKeyModel.find({ userId: String(user._id) }).select("provider isActive").lean();
@@ -32,13 +32,17 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      hasKey: keyDocs.length > 0,
-      activeProvider,
-      savedProviders,
+      success: true,
+      data: {
+        hasKey: keyDocs.length > 0,
+        activeProvider,
+        savedProviders,
+      },
+      error: null
     }, { status: 200 });
   } catch (err) {
     console.error("GET /api/ai/check-key error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: "Server error" }, { status: 500 });
   }
 }
 

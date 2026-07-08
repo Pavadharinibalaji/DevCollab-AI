@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: (open: boolean) => void;
-  onCreateProject: (project: any) => void;
+  onCreateProject: (project: any) => Promise<void> | void;
   members: any[];
 }
 
@@ -17,6 +18,7 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject, members }
   const [status, setStatus] = useState<"planning" | "active" | "paused" | "completed">("planning");
   const [dueDate, setDueDate] = useState("");
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const toggleMemberSelection = (id: string) => {
     setSelectedMemberIds((prev) =>
@@ -24,34 +26,41 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject, members }
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !dueDate) return;
+    if (!title.trim() || !dueDate || loading) return;
 
-    // Resolve selected member objects
-    const projectMembers = members.filter((m) => selectedMemberIds.includes(m.id));
+    setLoading(true);
+    try {
+      // Resolve selected member objects
+      const projectMembers = members.filter((m) => selectedMemberIds.includes(m.id));
 
-    // Construct project input payload
-    const newProject = {
-      title,
-      description: description || "Collaborative dev workspace project.",
-      progress: status === "completed" ? 100 : 0,
-      priority,
-      status,
-      dueDate,
-      members: projectMembers,
-    };
+      // Construct project input payload
+      const newProject = {
+        title,
+        description: description || "Collaborative dev workspace project.",
+        progress: status === "completed" ? 100 : 0,
+        priority,
+        status,
+        dueDate,
+        members: projectMembers,
+      };
 
-    onCreateProject(newProject);
-    
-    // Reset forms
-    setTitle("");
-    setDescription("");
-    setPriority("medium");
-    setStatus("planning");
-    setDueDate("");
-    setSelectedMemberIds([]);
-    onClose(false);
+      await onCreateProject(newProject);
+      
+      // Reset forms
+      setTitle("");
+      setDescription("");
+      setPriority("medium");
+      setStatus("planning");
+      setDueDate("");
+      setSelectedMemberIds([]);
+      onClose(false);
+    } catch (err) {
+      console.error("Create project error in modal:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,7 +74,6 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject, members }
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {/* Title */}
           <div className="space-y-1.5">
             <label htmlFor="proj-title" className="text-xs font-semibold text-foreground">
               Project Title *
@@ -74,11 +82,15 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject, members }
               id="proj-title"
               type="text"
               required
+              maxLength={100}
               placeholder="e.g. API V3 Migration"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50"
             />
+            {title.length > 0 && title.length < 3 && (
+              <p className="text-[10px] text-rose-400 font-medium">Title must be at least 3 characters.</p>
+            )}
           </div>
 
           {/* Description */}
@@ -186,8 +198,10 @@ export function CreateProjectModal({ isOpen, onClose, onCreateProject, members }
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
+              disabled={loading || !title.trim() || title.length < 3 || title.length > 100 || !dueDate}
+              className="px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
+              {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Create Project
             </button>
           </div>

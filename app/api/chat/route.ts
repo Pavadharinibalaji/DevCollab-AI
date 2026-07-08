@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: "GROQ_API_KEY not set" }), {
+      return new Response(JSON.stringify({ success: false, data: null, error: "GROQ_API_KEY not set" }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const err = await response.text();
-      return new Response(JSON.stringify({ error: err }), {
+      return new Response(JSON.stringify({ success: false, data: null, error: err }), {
         status: response.status,
         headers: { "Content-Type": "application/json" },
       });
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     const error = err instanceof Error ? err.message : "Unknown error";
-    return new Response(JSON.stringify({ error }), {
+    return new Response(JSON.stringify({ success: false, data: null, error }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

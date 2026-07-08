@@ -97,17 +97,21 @@ export function CreateTaskModal({
         <form onSubmit={handleSubmit} className="space-y-4 pt-3">
           <div className="space-y-1">
             <label htmlFor="task-title" className="text-xs font-semibold text-muted-foreground">
-              Task Title
+              Task Title *
             </label>
             <input
               id="task-title"
               type="text"
+              placeholder="e.g. Implement Oauth2 Callback"
               required
-              placeholder="e.g. Implement refresh tokens"
+              maxLength={100}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-sm text-foreground focus:border-indigo-500 focus:outline-none"
+              className="w-full rounded-lg border border-border bg-background/50 px-3 py-2 text-sm text-foreground focus:border-indigo-500 focus:outline-none font-sans"
             />
+            {title.length > 0 && title.length < 3 && (
+              <p className="text-[10px] text-rose-400 font-medium">Title must be at least 3 characters.</p>
+            )}
           </div>
 
           <div className="space-y-1">
@@ -206,8 +210,8 @@ export function CreateTaskModal({
             </button>
             <Button
               type="submit"
-              disabled={loading || !title.trim()}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 cursor-pointer"
+              disabled={loading || !title.trim() || title.length < 3 || title.length > 100}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               Create Task

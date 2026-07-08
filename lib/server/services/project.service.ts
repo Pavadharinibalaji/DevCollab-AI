@@ -159,7 +159,7 @@ export const projectService = {
 
     try {
       const pObjectId = new mongoose.Types.ObjectId(projectId);
-      const project = await ProjectModel.findById(pObjectId);
+      const project = await ProjectModel.findById(pObjectId).lean();
       if (!project) return false;
 
       // Delete tasks associated with this project

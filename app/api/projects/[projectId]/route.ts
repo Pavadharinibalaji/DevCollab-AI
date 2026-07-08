@@ -43,21 +43,21 @@ export async function GET(
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     const { projectId } = await params;
 
     const conn = await connectMongoose();
     if (!conn) {
-      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
+      return NextResponse.json({ success: false, data: null, error: "Database connection failed" }, { status: 500 });
     }
 
     const pObjectId = new mongoose.Types.ObjectId(projectId);
 
     const projectDoc = await ProjectModel.findById(pObjectId).populate("members").lean({ virtuals: true });
     if (!projectDoc) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Project not found" }, { status: 404 });
     }
 
     const taskDocs = await TaskModel.find({ projectId: pObjectId }).populate("assigneeId").lean();
@@ -108,10 +108,10 @@ export async function GET(
       activities,
     };
 
-    return NextResponse.json({ project }, { status: 200 });
+    return NextResponse.json({ success: true, data: { project }, error: null }, { status: 200 });
   } catch (err) {
     console.error("GET /api/projects/[projectId] error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }
 
@@ -122,7 +122,7 @@ export async function PATCH(
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     const { projectId } = await params;
@@ -139,10 +139,10 @@ export async function PATCH(
       user: body.user,
     });
 
-    return NextResponse.json({ project: updated }, { status: 200 });
+    return NextResponse.json({ success: true, data: { project: updated }, error: null }, { status: 200 });
   } catch (err) {
     console.error("PATCH /api/projects/[projectId] error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }
 
@@ -153,20 +153,20 @@ export async function DELETE(
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     const { projectId } = await params;
 
     const success = await projectService.delete(projectId);
     if (!success) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Project not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, message: "Project deleted successfully" }, { status: 200 });
+    return NextResponse.json({ success: true, data: { message: "Project deleted successfully" }, error: null }, { status: 200 });
   } catch (err) {
     console.error("DELETE /api/projects/[projectId] error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }
 

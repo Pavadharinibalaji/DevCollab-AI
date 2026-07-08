@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("GET /api/tasks Error:", error);
     // Fallback to avoid 500 if anything unhandled throws
-    return NextResponse.json({ tasks: [], error: "Fallback mode active" }, { status: 200 });
+    return NextResponse.json({ success: true, data: { tasks: [] }, error: "Fallback mode active" }, { status: 200 });
   }
 }
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     return await taskController.create(req);
   } catch (error) {
     console.error("POST /api/tasks Error:", error);
-    return NextResponse.json({ error: "Failed to create task in fallback mode" }, { status: 400 });
+    return NextResponse.json({ success: false, data: null, error: "Failed to create task in fallback mode" }, { status: 400 });
   }
 }
 

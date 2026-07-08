@@ -17,14 +17,25 @@ export async function apiClient<T>(
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
-  if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as { message?: string } | null;
-    throw new ApiError(payload?.message ?? response.statusText, response.status);
-  }
-
   if (response.status === 204) {
     return undefined as T;
   }
 
-  return response.json() as Promise<T>;
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message = payload && typeof payload === "object" && "error" in payload 
+      ? payload.error 
+      : payload?.message ?? response.statusText;
+    throw new ApiError(message, response.status);
+  }
+
+  if (payload && typeof payload === "object" && "success" in payload) {
+    if (!payload.success) {
+      throw new ApiError(payload.error || "Request failed", response.status);
+    }
+    return payload.data as T;
+  }
+
+  return payload as T;
 }

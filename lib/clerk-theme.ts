@@ -77,5 +77,66 @@ export const clerkTheme = {
     formFieldWarningText: "text-amber-400 text-xs font-semibold mt-1",
     formFieldErrorText: "text-rose-400 text-xs font-semibold mt-1",
     formFieldHintText: "text-zinc-500 text-xs",
+
+    // UserButton Popover Dropdown Styling
+    userButtonPopoverCard: "bg-card border border-border/80 shadow-2xl rounded-xl p-1.5 min-w-[240px] text-foreground animate-in fade-in slide-in-from-top-1 duration-150",
+    userButtonPopoverHeader: "p-2.5 border-b border-border/40 mb-1",
+    userButtonPopoverMain: "space-y-0.5",
+    userButtonPopoverUserPreview: "flex items-center gap-3 px-1 py-0.5",
+    userButtonPopoverUserPreviewAvatarBox: "h-9 w-9 border border-border/30 rounded-full",
+    
+    // Text elements styled via objects for inline priority:
+    userButtonPopoverUserPreviewMainIdentifier: {
+      color: "#ececee",
+      fontWeight: "600",
+    },
+    userButtonPopoverUserPreviewSecondaryIdentifier: {
+      color: "#8b8b93",
+      fontSize: "0.75rem",
+    },
+    userButtonPopoverActionButton: {
+      color: "#ececee",
+      display: "flex",
+      width: "100%",
+      alignItems: "center",
+      gap: "0.5rem",
+      borderRadius: "0.5rem",
+      padding: "0.5rem 0.625rem",
+      textAlign: "left",
+      fontSize: "0.75rem",
+      fontWeight: "500",
+      transitionProperty: "all",
+      cursor: "pointer",
+    },
+    userButtonPopoverActionButtonText: {
+      color: "#ececee",
+      fontWeight: "500",
+    },
+    userButtonPopoverActionButtonIcon: "text-muted-foreground opacity-80 h-4 w-4 shrink-0",
+    userButtonPopoverFooter: "p-2 border-t border-border/30 mt-1 text-center",
+    userButtonPopoverFooterLink: {
+      color: "#8b8b93",
+      fontSize: "10px",
+      fontWeight: "500",
+    },
+    userButtonPopoverCustomItemButton: {
+      color: "#ececee",
+      display: "flex",
+      width: "100%",
+      alignItems: "center",
+      gap: "0.5rem",
+      borderRadius: "0.5rem",
+      padding: "0.5rem 0.625rem",
+      textAlign: "left",
+      fontSize: "0.75rem",
+      fontWeight: "500",
+      transitionProperty: "all",
+      cursor: "pointer",
+    },
+    userButtonPopoverCustomItemButtonText: {
+      color: "#ececee",
+      fontWeight: "500",
+    },
+    userButtonPopoverCustomItemButtonIcon: "text-muted-foreground opacity-80 h-4 w-4 shrink-0",
   },
 };

@@ -11,13 +11,13 @@ export async function GET() {
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     await connectMongoose();
     const workspace = await getActiveWorkspace(user);
     if (!workspace) {
-      return NextResponse.json({ workspace: null, metrics: null }, { status: 200 });
+      return NextResponse.json({ success: true, data: { workspace: null, metrics: null }, error: null }, { status: 200 });
     }
 
     const metrics = await workspaceService.getMetrics(workspace._id.toString());
@@ -26,16 +26,20 @@ export async function GET() {
       workspaceId: workspace._id,
       status: "pending",
       expiresAt: { $gt: new Date() },
-    }).populate("invitedBy", "name email");
+    }).populate("invitedBy", "name email").lean();
 
     return NextResponse.json({
-      workspace,
-      metrics,
-      invitations,
+      success: true,
+      data: {
+        workspace,
+        metrics,
+        invitations,
+      },
+      error: null
     }, { status: 200 });
   } catch (err) {
     console.error("GET /api/workspace error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }
 
@@ -43,7 +47,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     await connectMongoose();
@@ -57,12 +61,12 @@ export async function POST(req: NextRequest) {
         body.slug,
         body.description
       );
-      return NextResponse.json({ success: true, workspace }, { status: 201 });
+      return NextResponse.json({ success: true, data: { workspace }, error: null }, { status: 201 });
     } else if (body.email) {
       // Invite Member
       const workspace = await getActiveWorkspace(user);
       if (!workspace) {
-        return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+        return NextResponse.json({ success: false, data: null, error: "Workspace not found" }, { status: 404 });
       }
       const res = await workspaceService.inviteMember(
         workspace._id.toString(),
@@ -71,15 +75,15 @@ export async function POST(req: NextRequest) {
         user._id.toString()
       );
       if (!res.success) {
-        return NextResponse.json({ error: res.error }, { status: res.statusCode || 400 });
+        return NextResponse.json({ success: false, data: null, error: res.error }, { status: res.statusCode || 400 });
       }
-      return NextResponse.json(res, { status: 200 });
+      return NextResponse.json({ success: true, data: res, error: null }, { status: 200 });
     } else {
-      return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: "Invalid request payload" }, { status: 400 });
     }
   } catch (err) {
     console.error("POST /api/workspace error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }
 
@@ -87,26 +91,26 @@ export async function DELETE() {
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     await connectMongoose();
     const activeWs = await getActiveWorkspace(user);
     if (!activeWs) {
-      return NextResponse.json({ error: "Workspace not found or unauthorized to delete" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Workspace not found or unauthorized to delete" }, { status: 404 });
     }
 
-    const workspace = await WorkspaceModel.findOne({ _id: activeWs._id, ownerId: user._id });
+    const workspace = await WorkspaceModel.findOne({ _id: activeWs._id, ownerId: user._id }).lean();
     if (!workspace) {
-      return NextResponse.json({ error: "Workspace not found or unauthorized to delete" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Workspace not found or unauthorized to delete" }, { status: 404 });
     }
 
     await workspaceService.deleteWorkspace(workspace._id.toString());
 
-    return NextResponse.json({ success: true, message: "Workspace deleted successfully" }, { status: 200 });
+    return NextResponse.json({ success: true, data: { message: "Workspace deleted successfully" }, error: null }, { status: 200 });
   } catch (err) {
     console.error("DELETE /api/workspace error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }
 
@@ -114,7 +118,7 @@ export async function PATCH(req: NextRequest) {
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     await connectMongoose();
@@ -123,13 +127,13 @@ export async function PATCH(req: NextRequest) {
     // Get user's active workspace
     const workspace = await getActiveWorkspace(user);
     if (!workspace) {
-      return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Workspace not found" }, { status: 404 });
     }
 
     // Check permissions (only owner or admin)
     const memberRecord = workspace.members.find((m: any) => m.userId?._id?.toString() === user._id.toString() || m.userId?.toString() === user._id.toString());
     if (!memberRecord || (memberRecord.role !== "owner" && memberRecord.role !== "admin")) {
-      return NextResponse.json({ error: "Unauthorized to update workspace" }, { status: 403 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized to update workspace" }, { status: 403 });
     }
 
     const { name, slug, description } = body;
@@ -140,9 +144,9 @@ export async function PATCH(req: NextRequest) {
 
     // Verify slug uniqueness if it changed
     if (slug && slug !== workspace.slug) {
-      const existing = await WorkspaceModel.findOne({ slug });
+      const existing = await WorkspaceModel.findOne({ slug }).lean();
       if (existing) {
-        return NextResponse.json({ error: "Workspace slug already in use" }, { status: 400 });
+        return NextResponse.json({ success: false, data: null, error: "Workspace slug already in use" }, { status: 400 });
       }
     }
 
@@ -152,9 +156,9 @@ export async function PATCH(req: NextRequest) {
       { new: true }
     );
 
-    return NextResponse.json({ success: true, workspace: updatedWorkspace }, { status: 200 });
+    return NextResponse.json({ success: true, data: { workspace: updatedWorkspace }, error: null }, { status: 200 });
   } catch (err) {
     console.error("PATCH /api/workspace error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }

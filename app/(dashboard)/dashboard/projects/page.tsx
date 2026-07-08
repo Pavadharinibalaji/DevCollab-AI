@@ -105,8 +105,10 @@ export default function ProjectsPage() {
         dueDate: newProject.dueDate,
         members: newProject.members?.map((m: any) => m.id),
       });
+      await fetchProjects();
     } catch (err) {
       console.error("Failed to create project:", err);
+      throw err;
     }
   };
 
@@ -156,6 +158,23 @@ export default function ProjectsPage() {
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
           <p className="text-sm text-muted-foreground">Loading workspace projects...</p>
+        </div>
+      ) : projects.length === 0 ? (
+        <div className="flex flex-col items-center justify-center text-center py-20 px-4 rounded-xl border border-dashed border-border/30 bg-card/10 space-y-4">
+          <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-2xl border border-indigo-500/20">
+            <Plus className="h-6 w-6" />
+          </div>
+          <div className="space-y-1 max-w-sm">
+            <h4 className="text-sm font-semibold text-foreground">No projects created yet</h4>
+            <p className="text-xs text-muted-foreground">Get started by setting up a project to manage your software tasks and code workflows.</p>
+          </div>
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md hover:bg-indigo-500 transition-all cursor-pointer"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Create First Project
+          </button>
         </div>
       ) : filteredProjects.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">

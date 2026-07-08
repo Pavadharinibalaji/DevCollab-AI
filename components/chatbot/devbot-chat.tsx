@@ -319,7 +319,7 @@ export function DevBotChat({ isAgentOpen }: { isAgentOpen?: boolean }) {
         <div
           className={cn(
             "fixed bottom-20 z-50 flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/50 transition-all duration-300",
-            isAgentOpen ? "right-[calc(18%+1.25rem)]" : "right-5",
+            isAgentOpen ? "lg:right-[calc(18%+1.25rem)] right-5" : "right-5",
             expanded
               ? "h-[min(680px,80vh)] w-[min(520px,calc(100vw-2rem))]"
               : "h-[min(560px,75vh)] w-[min(380px,calc(100vw-2rem))]"

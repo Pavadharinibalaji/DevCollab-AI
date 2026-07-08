@@ -16,7 +16,7 @@ export async function PATCH(
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     const { userId: memberId } = await params;
@@ -24,13 +24,13 @@ export async function PATCH(
     const { role } = body;
 
     if (!role || !["admin", "member"].includes(role)) {
-      return NextResponse.json({ error: "Invalid role specified" }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: "Invalid role specified" }, { status: 400 });
     }
 
     await connectMongoose();
     const workspace = await getActiveWorkspace(user);
     if (!workspace) {
-      return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Workspace not found" }, { status: 404 });
     }
 
     // Get current user's role in this workspace
@@ -38,7 +38,7 @@ export async function PATCH(
       (m: any) => m.userId?._id?.toString() === user._id.toString() || m.userId?.toString() === user._id.toString()
     );
     if (!currentUserMember || (currentUserMember.role !== "owner" && currentUserMember.role !== "admin")) {
-      return NextResponse.json({ error: "Unauthorized: only owners or admins can change roles" }, { status: 403 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized: only owners or admins can change roles" }, { status: 403 });
     }
 
     // Verify membership of targeted user
@@ -46,19 +46,19 @@ export async function PATCH(
       (m: any) => m.userId?._id?.toString() === memberId || m.userId?.toString() === memberId
     );
     if (!memberToUpdate) {
-      return NextResponse.json({ error: "Member not found in workspace" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Member not found in workspace" }, { status: 404 });
     }
 
     // Verify ownership security
     const ownerIdStr = workspace.ownerId.toString();
     if (memberId === ownerIdStr) {
-      return NextResponse.json({ error: "Cannot change the role of the workspace owner" }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: "Cannot change the role of the workspace owner" }, { status: 400 });
     }
 
     // If current user is admin, they cannot modify other admins or owner
     if (currentUserMember.role === "admin") {
       if (memberToUpdate.role === "admin" || memberId === ownerIdStr) {
-        return NextResponse.json({ error: "Admins cannot change role of other admins or the owner" }, { status: 403 });
+        return NextResponse.json({ success: false, data: null, error: "Admins cannot change role of other admins or the owner" }, { status: 403 });
       }
     }
 
@@ -89,10 +89,10 @@ export async function PATCH(
 
     await realtimeBroker.publish("global", "teamUpdated", {});
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ success: true, data: null, error: null }, { status: 200 });
   } catch (err) {
     console.error("PATCH /api/workspace/members error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }
 
@@ -103,7 +103,7 @@ export async function DELETE(
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     const { userId: memberId } = await params;
@@ -111,7 +111,7 @@ export async function DELETE(
     await connectMongoose();
     const workspace = await getActiveWorkspace(user);
     if (!workspace) {
-      return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Workspace not found" }, { status: 404 });
     }
 
     // Get current user's role in this workspace
@@ -119,7 +119,7 @@ export async function DELETE(
       (m: any) => m.userId?._id?.toString() === user._id.toString() || m.userId?.toString() === user._id.toString()
     );
     if (!currentUserMember || (currentUserMember.role !== "owner" && currentUserMember.role !== "admin")) {
-      return NextResponse.json({ error: "Unauthorized: only owners or admins can remove members" }, { status: 403 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized: only owners or admins can remove members" }, { status: 403 });
     }
 
     // Verify membership of targeted user
@@ -127,19 +127,19 @@ export async function DELETE(
       (m: any) => m.userId?._id?.toString() === memberId || m.userId?.toString() === memberId
     );
     if (!memberToDelete) {
-      return NextResponse.json({ error: "Member not found in workspace" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Member not found in workspace" }, { status: 404 });
     }
 
     // Verify ownership security
     const ownerIdStr = workspace.ownerId.toString();
     if (memberId === ownerIdStr) {
-      return NextResponse.json({ error: "Cannot remove the workspace owner" }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: "Cannot remove the workspace owner" }, { status: 400 });
     }
 
     // If current user is admin, they cannot modify other admins or owner
     if (currentUserMember.role === "admin") {
       if (memberToDelete.role === "admin" || memberId === ownerIdStr) {
-        return NextResponse.json({ error: "Admins cannot remove other admins or the owner" }, { status: 403 });
+        return NextResponse.json({ success: false, data: null, error: "Admins cannot remove other admins or the owner" }, { status: 403 });
       }
     }
 
@@ -173,9 +173,9 @@ export async function DELETE(
 
     await realtimeBroker.publish("global", "teamUpdated", {});
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ success: true, data: null, error: null }, { status: 200 });
   } catch (err) {
     console.error("DELETE /api/workspace/members error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }

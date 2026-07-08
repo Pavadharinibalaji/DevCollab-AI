@@ -41,7 +41,7 @@ export const taskService = {
         dueDate: input.dueDate ? new Date(input.dueDate) : undefined,
       });
 
-      const populated = await TaskModel.findById(doc._id).populate("assigneeId");
+      const populated = await TaskModel.findById(doc._id).populate("assigneeId").lean();
       if (populated) {
         await projectService.recalculateProgress(populated.projectId.toString());
       }
@@ -86,7 +86,7 @@ export const taskService = {
 
       const doc = await TaskModel.findByIdAndUpdate(toObjectId(input.taskId), update, {
         new: true,
-      }).populate("assigneeId");
+      }).populate("assigneeId").lean();
 
       if (doc) {
         await projectService.recalculateProgress(doc.projectId.toString());
@@ -104,7 +104,7 @@ export const taskService = {
     if (!conn) throw new Error("Database connection failed");
 
     try {
-      const doc = await TaskModel.findByIdAndDelete(toObjectId(taskId)).populate("assigneeId");
+      const doc = await TaskModel.findByIdAndDelete(toObjectId(taskId)).populate("assigneeId").lean();
       if (doc) {
         await projectService.recalculateProgress(doc.projectId.toString());
       }

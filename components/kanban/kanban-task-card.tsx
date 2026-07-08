@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Calendar } from "lucide-react";
@@ -21,15 +22,16 @@ const PRIORITY_LABEL: Record<KanbanPriority, string> = {
   urgent: "Urgent",
 };
 
-export function KanbanTaskCard({
-  task,
-  isOverlay,
-  onClick,
-}: {
-  task: KanbanTask;
-  isOverlay?: boolean;
-  onClick?: () => void;
-}) {
+export const KanbanTaskCard = memo(
+  function KanbanTaskCard({
+    task,
+    isOverlay,
+    onClick,
+  }: {
+    task: KanbanTask;
+    isOverlay?: boolean;
+    onClick?: () => void;
+  }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
   });
@@ -54,7 +56,19 @@ export function KanbanTaskCard({
       <TaskCardFace task={task} onClick={onClick} />
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.isOverlay === nextProps.isOverlay &&
+    prevProps.task.id === nextProps.task.id &&
+    prevProps.task.title === nextProps.task.title &&
+    prevProps.task.status === nextProps.task.status &&
+    prevProps.task.priority === nextProps.task.priority &&
+    prevProps.task.dueDate === nextProps.task.dueDate &&
+    prevProps.task.assignee.id === nextProps.task.assignee.id &&
+    prevProps.task.assignee.name === nextProps.task.assignee.name &&
+    prevProps.task.assignee.initials === nextProps.task.assignee.initials
+  );
+});
 
 function TaskCardFace({ task, onClick }: { task: KanbanTask; onClick?: () => void }) {
   const due = task.dueDate ? new Date(task.dueDate) : null;
@@ -69,6 +83,7 @@ function TaskCardFace({ task, onClick }: { task: KanbanTask; onClick?: () => voi
         }
       }}
       className="cursor-pointer rounded-lg border border-border/60 bg-card/90 p-3 shadow-sm ring-1 ring-border/40 hover:border-indigo-500/40 hover:shadow-md transition-all active:cursor-grabbing text-left"
+      aria-label={`Task card for: ${task.title}. Priority is ${task.priority}. ${task.assignee.name ? `Assigned to ${task.assignee.name}` : 'Unassigned'}.`}
     >
       <h3 className="text-left text-[13px] font-medium leading-snug text-foreground group-hover:text-indigo-400 transition-colors">
         {task.title}

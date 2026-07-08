@@ -57,6 +57,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
     <Link
       href={`/dashboard/projects/${id}`}
       className="group relative block overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-card/60 to-card/20 p-5 transition-all duration-300 hover:border-indigo-500/40 hover:bg-card/80 hover:shadow-xl hover:shadow-black/40"
+      aria-label={`Project card for: ${title}. Status is ${status}, progress is ${progress}%. Click to view details.`}
     >
       {/* Glow effect on hover */}
       <div className="pointer-events-none absolute -right-16 -top-16 h-32 w-32 rounded-full bg-indigo-500/5 blur-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />

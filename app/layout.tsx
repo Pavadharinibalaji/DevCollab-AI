@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { clerkTheme } from "@/lib/clerk-theme";
+import { ToastProvider } from "@/components/ui/toast";
 
 import "./globals.css";
 
@@ -24,7 +25,9 @@ export default function RootLayout({
           afterSignOutUrl="/"
           appearance={clerkTheme}
         >
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </ClerkProvider>
       </body>
     </html>

@@ -14,7 +14,7 @@ export async function getActiveWorkspace(user: { _id: mongoose.Types.ObjectId | 
     const workspace = await WorkspaceModel.findOne({
       _id: new mongoose.Types.ObjectId(workspaceIdFromCookie),
       "members.userId": userId,
-    }).populate("members.userId");
+    }).populate("members.userId").lean();
 
     if (workspace) {
       return workspace;
@@ -23,7 +23,8 @@ export async function getActiveWorkspace(user: { _id: mongoose.Types.ObjectId | 
 
   // Fallback to first workspace the user belongs to
   const workspace = await WorkspaceModel.findOne({ "members.userId": userId })
-    .populate("members.userId");
+    .populate("members.userId")
+    .lean();
 
   if (workspace) {
     // Sync the cookie

@@ -17,15 +17,18 @@ export async function GET(request: Request, context: { params: Promise<{ token: 
     const workspace = (invitation as any).workspaceId as any;
     return NextResponse.json({
       success: true,
-      invitation: {
-        email: invitation.email,
-        role: invitation.role,
-        workspaceId: invitation.workspaceId,
-        workspaceName: workspace?.name,
+      data: {
+        invitation: {
+          email: invitation.email,
+          role: invitation.role,
+          workspaceId: invitation.workspaceId,
+          workspaceName: workspace?.name,
+        },
       },
+      error: null
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Invalid invitation' }, { status: 400 });
+    return NextResponse.json({ success: false, data: null, error: err.message || 'Invalid invitation' }, { status: 400 });
   }
 }
 
@@ -37,14 +40,14 @@ export async function POST(request: Request, context: { params: Promise<{ token:
   const { token } = await context.params;
   const { userId } = await auth();
   if (!userId) {
-    return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
+    return NextResponse.json({ success: false, data: null, error: 'Unauthenticated' }, { status: 401 });
   }
   try {
     const result = await invitationService.acceptInvitation(token, userId);
-    return NextResponse.json({ success: true, workspaceId: result.workspaceId, userId: result.userId });
+    return NextResponse.json({ success: true, data: { workspaceId: result.workspaceId, userId: result.userId }, error: null });
   } catch (err: any) {
     console.error('Accept invitation error:', err);
-    return NextResponse.json({ error: err.message || 'Failed to accept invitation' }, { status: 400 });
+    return NextResponse.json({ success: false, data: null, error: err.message || 'Failed to accept invitation' }, { status: 400 });
   }
 }
 
@@ -56,28 +59,28 @@ export async function DELETE(request: Request, context: { params: Promise<{ toke
   const { token } = await context.params;
   const user = await getCurrentMongoUser();
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ success: false, data: null, error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const conn = await connectMongoose();
     if (!conn) throw new Error('Database connection failed');
 
-    const invitation = await InvitationModel.findOne({ token });
+    const invitation = await InvitationModel.findOne({ token }).lean();
     if (!invitation) {
-      return NextResponse.json({ error: 'Invitation not found' }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: 'Invitation not found' }, { status: 404 });
     }
 
-    const workspace = await WorkspaceModel.findById(invitation.workspaceId);
+    const workspace = await WorkspaceModel.findById(invitation.workspaceId).lean();
     if (!workspace) {
-      return NextResponse.json({ error: 'Workspace not found' }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: 'Workspace not found' }, { status: 404 });
     }
 
     const isAuthorized = workspace.members.some(
       (m: any) => m.userId.toString() === user._id.toString() && (m.role === 'owner' || m.role === 'admin')
     );
     if (!isAuthorized) {
-      return NextResponse.json({ error: 'Only workspace owners or admins can revoke invitation links' }, { status: 403 });
+      return NextResponse.json({ success: false, data: null, error: 'Only workspace owners or admins can revoke invitation links' }, { status: 403 });
     }
 
     await InvitationModel.deleteOne({ token });
@@ -85,9 +88,9 @@ export async function DELETE(request: Request, context: { params: Promise<{ toke
     // Emit Socket.IO realtime event
     await realtimeBroker.publish("global", "invitationsUpdated", { workspaceId: invitation.workspaceId.toString() });
 
-    return NextResponse.json({ success: true, message: 'Invitation revoked successfully' });
+    return NextResponse.json({ success: true, data: { message: 'Invitation revoked successfully' }, error: null });
   } catch (err: any) {
     console.error('Revoke invitation error:', err);
-    return NextResponse.json({ error: err.message || 'Failed to revoke invitation' }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: err.message || 'Failed to revoke invitation' }, { status: 500 });
   }
 }

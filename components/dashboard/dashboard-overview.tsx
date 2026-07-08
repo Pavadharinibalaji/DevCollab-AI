@@ -21,10 +21,16 @@ import {
   ProjectOverviewCardSkeleton,
 } from "./project-overview-card";
 import { ActivityFeed, ActivityFeedSkeleton } from "./activity-feed";
-import {
-  ProductivityChart,
-  ProductivityChartSkeleton,
-} from "./productivity-chart";
+import dynamic from "next/dynamic";
+import { ProductivityChartSkeleton } from "./productivity-chart";
+
+const ProductivityChart = dynamic(
+  () => import("./productivity-chart").then((mod) => mod.ProductivityChart),
+  {
+    loading: () => <ProductivityChartSkeleton />,
+    ssr: false,
+  }
+);
 
 // Dialog components
 import {
@@ -92,8 +98,6 @@ export function DashboardOverview({
   const fetchDashboardData = async (showLoading = false) => {
     if (showLoading) setIsLoading(true);
     try {
-      await fetch("/api/users/me");
-
       const [workspaceRes, projectsList, activitiesList] = await Promise.all([
         workspaceService.getWorkspaceWithMetrics(),
         projectService.list(),

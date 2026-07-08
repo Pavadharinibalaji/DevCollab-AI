@@ -440,8 +440,8 @@ export default function SettingsPage() {
                       <div className="flex justify-end pt-2">
                         <button
                           type="submit"
-                          disabled={updating}
-                          className="px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-md shadow-indigo-600/10 disabled:opacity-50"
+                          disabled={updating || !wsName.trim() || wsName.length < 3 || !wsSlug.trim() || wsSlug.length < 3}
+                          className="px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-md shadow-indigo-600/10 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {updating && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                           Save Changes

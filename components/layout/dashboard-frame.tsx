@@ -24,7 +24,7 @@ export function DashboardFrame({ children, isAgentOpen }: DashboardFrameProps) {
   }, [mobileOpen]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-full min-h-0 w-full">
       <aside className="hidden w-[260px] shrink-0 flex-col border-r border-border/70 bg-secondary/30 lg:flex">
         <SidebarContent />
       </aside>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Calendar, User, AlertCircle, MessageSquare, Clock, Trash2, Check } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ export function TaskDetailsModal({
   members,
   onDeleteSuccess,
 }: TaskDetailsModalProps) {
+  const toast = useToast();
   const [task, setTask] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -150,11 +152,12 @@ export function TaskDetailsModal({
       const res = await fetch(`/api/tasks/${taskId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete task");
       
+      toast.success("Task deleted successfully");
       if (onDeleteSuccess) onDeleteSuccess();
       onClose(false);
     } catch (err: any) {
       console.error(err);
-      alert(err.message || "Failed to delete task");
+      toast.error(err.message || "Failed to delete task");
     }
   };
 

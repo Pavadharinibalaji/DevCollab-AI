@@ -6,7 +6,7 @@ export async function POST(request: Request, context: { params: Promise<{ worksp
   const { workspaceId } = await context.params;
   const user = await getCurrentMongoUser();
   if (!user) {
-    return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
+    return NextResponse.json({ success: false, data: null, error: 'Unauthenticated' }, { status: 401 });
   }
 
   const { email, role } = await request.json();
@@ -17,9 +17,9 @@ export async function POST(request: Request, context: { params: Promise<{ worksp
       email,
       role
     );
-    return NextResponse.json({ success: true, invitationId: (invitation as any)._id, resent });
+    return NextResponse.json({ success: true, data: { invitationId: (invitation as any)._id, resent }, error: null });
   } catch (err: any) {
     console.error('Invitation creation error:', err);
-    return NextResponse.json({ error: err.message || 'Failed to create invitation' }, { status: err.statusCode || 400 });
+    return NextResponse.json({ success: false, data: null, error: err.message || 'Failed to create invitation' }, { status: err.statusCode || 400 });
   }
 }

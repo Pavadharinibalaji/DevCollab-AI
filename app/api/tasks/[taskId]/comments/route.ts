@@ -15,7 +15,7 @@ export async function POST(
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     const { taskId } = await params;
@@ -23,7 +23,7 @@ export async function POST(
     const { content } = body;
 
     if (!content || !content.trim()) {
-      return NextResponse.json({ error: "Content is required" }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: "Content is required" }, { status: 400 });
     }
 
     await connectMongoose();
@@ -36,7 +36,7 @@ export async function POST(
     ).populate("assigneeId").populate("comments.userId");
 
     if (!task) {
-      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Task not found" }, { status: 404 });
     }
 
     const initials = user.name
@@ -82,9 +82,9 @@ export async function POST(
 
     await realtimeBroker.publish(task.projectId.toString(), "taskUpdated", mapped);
 
-    return NextResponse.json({ comments: task.comments }, { status: 201 });
+    return NextResponse.json({ success: true, data: { comments: task.comments }, error: null }, { status: 201 });
   } catch (err) {
     console.error("POST /api/tasks/[taskId]/comments error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }

@@ -10,12 +10,12 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     const { workspaceId } = await req.json().catch(() => ({}));
     if (!workspaceId) {
-      return NextResponse.json({ error: "workspaceId is required" }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: "workspaceId is required" }, { status: 400 });
     }
 
     await connectMongoose();
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!workspace) {
-      return NextResponse.json({ error: "Workspace not found or access denied" }, { status: 404 });
+      return NextResponse.json({ success: false, data: null, error: "Workspace not found or access denied" }, { status: 404 });
     }
 
     const cookieStore = await cookies();
@@ -36,9 +36,9 @@ export async function POST(req: NextRequest) {
       sameSite: "lax",
     });
 
-    return NextResponse.json({ success: true, workspaceId }, { status: 200 });
+    return NextResponse.json({ success: true, data: { workspaceId }, error: null }, { status: 200 });
   } catch (err) {
     console.error("POST /api/workspaces/switch error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }

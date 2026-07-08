@@ -37,41 +37,57 @@ export const workspaceService = {
         dueDate: { $lt: new Date() }
       });
       
-      const workspace = await WorkspaceModel.findById(wId);
+      const workspace = await WorkspaceModel.findById(wId).lean();
       const totalMembers = workspace ? workspace.members.length : 1;
       const onlineMembers = Math.max(1, Math.ceil(totalMembers * 0.75));
 
-      // Calculate velocity data for the last 7 days
-      const velocity: Array<{ name: string; completed: number; created: number }> = [];
+      // Calculate velocity data for the last 7 days in a single query
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       const now = new Date();
 
-      for (let i = 6; i >= 0; i--) {
+      const startOfRange = new Date();
+      startOfRange.setDate(now.getDate() - 6);
+      startOfRange.setHours(0, 0, 0, 0);
+
+      const tasks = await TaskModel.find({
+        workspaceId: wId,
+        $or: [
+          { createdAt: { $gte: startOfRange } },
+          { updatedAt: { $gte: startOfRange } }
+        ]
+      }).lean();
+
+      const daysData = Array.from({ length: 7 }, (_, idx) => {
         const d = new Date();
-        d.setDate(now.getDate() - i);
+        d.setDate(now.getDate() - (6 - idx));
         d.setHours(0, 0, 0, 0);
-        
-        const startOfDay = d;
-        const endOfDay = new Date(d);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const createdCount = await TaskModel.countDocuments({
-          workspaceId: wId,
-          createdAt: { $gte: startOfDay, $lte: endOfDay },
-        });
-
-        const completedCount = await TaskModel.countDocuments({
-          workspaceId: wId,
-          status: "done",
-          updatedAt: { $gte: startOfDay, $lte: endOfDay },
-        });
-
-        velocity.push({
+        return {
+          dateStr: d.toDateString(),
           name: days[d.getDay()],
-          completed: completedCount,
-          created: createdCount,
+          completed: 0,
+          created: 0,
+        };
+      });
+
+      tasks.forEach((task) => {
+        const taskCreatedStr = task.createdAt ? new Date(task.createdAt).toDateString() : "";
+        const taskUpdatedStr = task.updatedAt ? new Date(task.updatedAt).toDateString() : "";
+
+        daysData.forEach((day) => {
+          if (taskCreatedStr === day.dateStr) {
+            day.created++;
+          }
+          if (task.status === "done" && taskUpdatedStr === day.dateStr) {
+            day.completed++;
+          }
         });
-      }
+      });
+
+      const velocity = daysData.map((d) => ({
+        name: d.name,
+        completed: d.completed,
+        created: d.created,
+      }));
 
       return {
         activeProjects,

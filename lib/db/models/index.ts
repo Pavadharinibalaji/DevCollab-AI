@@ -36,3 +36,11 @@ export {
   type InvitationDoc,
   type InvitationStatus,
 } from "./invitation.model";
+
+export {
+  UserKeyModel,
+  UserKeySchema,
+  USER_KEY_PROVIDERS,
+  type UserKeyDoc,
+  type UserKeyProvider,
+} from "./user-key.model";

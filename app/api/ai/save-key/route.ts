@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { connectMongoose } from "@/lib/db/mongoose";
 import { getCurrentMongoUser } from "@/lib/server/auth/getCurrentMongoUser";
+import { UserKeyModel, USER_KEY_PROVIDERS, type UserKeyProvider } from "@/lib/db/models";
 import { encrypt } from "@/lib/crypto";
-import { UserKeyModel, USER_KEY_PROVIDERS, type UserKeyProvider } from "@/models/UserKey";
 
 export const runtime = "nodejs";
 
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -18,17 +18,17 @@ export async function POST(req: NextRequest) {
     const provider = String(body?.provider || "openai").trim() as UserKeyProvider;
 
     if (!apiKey) {
-      return NextResponse.json({ error: "Missing apiKey" }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: "Missing apiKey" }, { status: 400 });
     }
     
     const validProviders = USER_KEY_PROVIDERS as unknown as string[];
     if (!validProviders.includes(provider)) {
-      return NextResponse.json({ error: "Unsupported provider" }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: "Unsupported provider" }, { status: 400 });
     }
 
     const conn = await connectMongoose();
     if (!conn) {
-      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
+      return NextResponse.json({ success: false, data: null, error: "Database connection failed" }, { status: 500 });
     }
 
     const encrypted = encrypt(apiKey);
@@ -49,10 +49,10 @@ export async function POST(req: NextRequest) {
       { upsert: true, new: true },
     );
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    return NextResponse.json({ success: true, data: null, error: null }, { status: 200 });
   } catch (err) {
     console.error("POST /api/ai/save-key error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: "Server error" }, { status: 500 });
   }
 }
 

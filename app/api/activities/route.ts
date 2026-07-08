@@ -10,19 +10,19 @@ export async function GET() {
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     await connectMongoose();
     const workspace = await getActiveWorkspace(user);
     if (!workspace) {
-      return NextResponse.json({ activities: [] }, { status: 200 });
+      return NextResponse.json({ success: true, data: { activities: [] }, error: null }, { status: 200 });
     }
     const activities = await activityService.list(workspace._id.toString());
     
-    return NextResponse.json({ activities }, { status: 200 });
+    return NextResponse.json({ success: true, data: { activities }, error: null }, { status: 200 });
   } catch (err) {
     console.error("GET /api/activities error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }

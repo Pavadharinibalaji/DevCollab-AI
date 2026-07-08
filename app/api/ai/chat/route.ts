@@ -2,9 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import mongoose from "mongoose";
 import { connectMongoose } from "@/lib/db/mongoose";
 import { getCurrentMongoUser } from "@/lib/server/auth/getCurrentMongoUser";
-import { ProjectModel, TaskModel } from "@/lib/db/models";
+import { ProjectModel, TaskModel, UserKeyModel } from "@/lib/db/models";
 import { decrypt } from "@/lib/crypto";
-import { UserKeyModel } from "@/models/UserKey";
 
 export const runtime = "nodejs";
 
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -46,12 +45,12 @@ export async function POST(req: NextRequest) {
     const projectId = body?.projectId ? String(body.projectId).trim() : "";
 
     if (!message) {
-      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: "Message is required" }, { status: 400 });
     }
 
     const conn = await connectMongoose();
     if (!conn) {
-      return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
+      return NextResponse.json({ success: false, data: null, error: "Database connection failed" }, { status: 500 });
     }
 
     let keyDoc = await UserKeyModel.findOne({ userId: String(user._id), isActive: true }).lean();
@@ -60,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!keyDoc?.apiKey) {
-      return NextResponse.json({ error: "Missing API key. Add your key in settings." }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: "Missing API key. Add your key in settings." }, { status: 400 });
     }
 
     const provider = keyDoc.provider;
@@ -68,7 +67,7 @@ export async function POST(req: NextRequest) {
     try {
       apiKey = decrypt(keyDoc.apiKey);
     } catch {
-      return NextResponse.json({ error: `Saved ${provider} API key could not be decrypted. Please re-save it in settings.` }, { status: 400 });
+      return NextResponse.json({ success: false, data: null, error: `Saved ${provider} API key could not be decrypted. Please re-save it in settings.` }, { status: 400 });
     }
 
     // Project context (optional, but included when projectId is provided)
@@ -168,7 +167,7 @@ export async function POST(req: NextRequest) {
       }
 
       if (status === 401 || status === 403) {
-        return NextResponse.json({ error: `Your ${provider} API key was rejected. Please verify it in settings.` }, { status: 400 });
+        return NextResponse.json({ success: false, data: null, error: `Your ${provider} API key was rejected. Please verify it in settings.` }, { status: 400 });
       }
 
       let errMsg = `${provider} request failed. Please try again.`;
@@ -184,7 +183,7 @@ export async function POST(req: NextRequest) {
       }
 
       console.error(`${provider} API error:`, status, detail);
-      return NextResponse.json({ error: errMsg }, { status: status >= 400 && status < 600 ? status : 502 });
+      return NextResponse.json({ success: false, data: null, error: errMsg }, { status: status >= 400 && status < 600 ? status : 502 });
     }
 
     const data = await aiRes.json();
@@ -201,10 +200,10 @@ export async function POST(req: NextRequest) {
       reply = "I did not get a response. Please try again.";
     }
 
-    return NextResponse.json({ reply }, { status: 200 });
+    return NextResponse.json({ success: true, data: { reply }, error: null }, { status: 200 });
   } catch (err) {
     console.error("POST /api/ai/chat error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: "Server error" }, { status: 500 });
   }
 }
 

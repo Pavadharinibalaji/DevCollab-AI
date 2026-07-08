@@ -10,24 +10,28 @@ export async function GET() {
   try {
     const clerkUser = await currentUser();
     if (!clerkUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     await connectMongoose();
     const dbUser = await userService.syncUser(clerkUser);
     if (!dbUser) {
-      return NextResponse.json({ error: "User sync failed" }, { status: 500 });
+      return NextResponse.json({ success: false, data: null, error: "User sync failed" }, { status: 500 });
     }
 
-    const workspace = await WorkspaceModel.findOne({ "members.userId": dbUser._id });
+    const workspace = await WorkspaceModel.findOne({ "members.userId": dbUser._id }).lean();
 
     return NextResponse.json({
-      user: dbUser,
-      workspace: workspace || null,
+      success: true,
+      data: {
+        user: dbUser,
+        workspace: workspace || null,
+      },
+      error: null
     }, { status: 200 });
   } catch (err) {
     console.error("GET /api/users/me error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }
 

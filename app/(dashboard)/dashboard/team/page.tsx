@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/shared/page-header";
 import { useSocket } from "@/hooks/use-socket";
+import { useToast } from "@/components/ui/toast";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 
 export default function TeamPage() {
+  const toast = useToast();
   const { user: clerkUser } = useUser();
   const [users, setUsers] = useState<any[]>([]);
   const [workspace, setWorkspace] = useState<any>(null);
@@ -157,10 +159,11 @@ export default function TeamPage() {
         method: 'DELETE',
       });
       if (res.ok) {
+        toast.success("Invitation link revoked successfully");
         await fetchData();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to revoke invitation.");
+        toast.error(err.error || "Failed to revoke invitation.");
       }
     } catch (err) {
       console.error("Revoke error:", err);
@@ -175,10 +178,11 @@ export default function TeamPage() {
         body: JSON.stringify({ role: newRole }),
       });
       if (res.ok) {
+        toast.success("Member role updated successfully");
         await fetchData();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to update role");
+        toast.error(err.error || "Failed to update role");
       }
     } catch (err) {
       console.error(err);
@@ -192,10 +196,11 @@ export default function TeamPage() {
         method: "DELETE",
       });
       if (res.ok) {
+        toast.success("Member removed successfully");
         await fetchData();
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to remove member");
+        toast.error(err.error || "Failed to remove member");
       }
     } catch (err) {
       console.error(err);
@@ -495,7 +500,7 @@ export default function TeamPage() {
                         onClick={() => {
                           const inviteUrl = `${window.location.origin}/invite/${invite.token}`;
                           navigator.clipboard.writeText(inviteUrl);
-                          alert("Invitation link copied!");
+                          toast.success("Invitation link copied!");
                         }}
                         className="rounded-md border border-border bg-background/50 hover:bg-background px-2 py-1 text-[10px] font-semibold text-foreground transition-all cursor-pointer flex items-center gap-1"
                         title="Copy Link"
@@ -552,7 +557,7 @@ export default function TeamPage() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(`${window.location.origin}/invite/${generatedToken}`);
-                    alert("Invitation link copied to clipboard!");
+                    toast.success("Invitation link copied to clipboard!");
                   }}
                   className="rounded bg-indigo-600 px-3 py-1 text-[10px] font-semibold text-white hover:bg-indigo-500 cursor-pointer shrink-0"
                 >

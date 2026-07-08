@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
@@ -17,7 +18,8 @@ type KanbanColumnProps = {
   onAddTaskClick?: (status: string) => void;
 };
 
-export function KanbanColumn({ columnId, taskIds, tasks, onTaskClick, onAddTaskClick }: KanbanColumnProps) {
+export const KanbanColumn = memo(
+  function KanbanColumn({ columnId, taskIds, tasks, onTaskClick, onAddTaskClick }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: columnId });
 
   return (
@@ -68,4 +70,11 @@ export function KanbanColumn({ columnId, taskIds, tasks, onTaskClick, onAddTaskC
       </SortableContext>
     </div>
   );
-}
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.columnId === nextProps.columnId &&
+    prevProps.taskIds.length === nextProps.taskIds.length &&
+    prevProps.taskIds.every((id, idx) => id === nextProps.taskIds[idx]) &&
+    prevProps.taskIds.every((id) => prevProps.tasks[id] === nextProps.tasks[id])
+  );
+});

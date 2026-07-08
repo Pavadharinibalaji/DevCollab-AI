@@ -24,10 +24,12 @@ import { ProjectActivityFeed } from "@/components/projects/project-activity-feed
 import { projectService, userService } from "@/services";
 import { useSocket } from "@/hooks/use-socket";
 import { apiClient } from "@/lib/api-client";
+import { useToast } from "@/components/ui/toast";
 
 type TabType = "overview" | "tasks" | "team" | "activity";
 
 export default function ProjectDetailPage() {
+  const toast = useToast();
   const params = useParams();
   const projectId = params?.projectId as string;
 
@@ -54,18 +56,19 @@ export default function ProjectDetailPage() {
   const handleDeleteProject = async () => {
     if (!project) return;
     if (deleteConfirmText !== project.title) {
-      alert("Project title confirmation does not match.");
+      toast.error("Project title confirmation does not match.");
       return;
     }
 
     setIsDeleting(true);
     try {
       await projectService.delete(project.id);
+      toast.success("Project deleted successfully");
       router.push("/dashboard/projects");
       router.refresh();
     } catch (err) {
       console.error("Failed to delete project:", err);
-      alert("Failed to delete project. Please try again.");
+      toast.error("Failed to delete project. Please try again.");
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);
@@ -239,7 +242,7 @@ export default function ProjectDetailPage() {
 
     // Check if already in project
     if (project.members.some((m: any) => m.id === selectedInviteMemberId)) {
-      alert("Collaborator is already a team member of this project.");
+      toast.error("Collaborator is already a team member of this project.");
       return;
     }
 

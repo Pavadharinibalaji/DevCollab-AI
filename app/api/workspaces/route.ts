@@ -9,14 +9,14 @@ export async function GET() {
   try {
     const user = await getCurrentMongoUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, data: null, error: "Unauthorized" }, { status: 401 });
     }
 
     await connectMongoose();
     const workspaces = await WorkspaceModel.find({ "members.userId": user._id }).lean();
-    return NextResponse.json({ workspaces }, { status: 200 });
+    return NextResponse.json({ success: true, data: { workspaces }, error: null }, { status: 200 });
   } catch (err) {
     console.error("GET /api/workspaces error:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ success: false, data: null, error: String(err) }, { status: 500 });
   }
 }

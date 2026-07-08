@@ -10,7 +10,7 @@ export async function getCurrentMongoUser() {
   const conn = await connectMongoose();
   if (!conn) throw new Error("Database connection failed");
 
-  let user = await UserModel.findOne({ clerkUserId: userId });
+  let user = await UserModel.findOne({ clerkUserId: userId }).lean();
   if (!user) {
     const clerkUser = await currentUser();
     if (clerkUser) {
