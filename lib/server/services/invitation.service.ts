@@ -114,13 +114,21 @@ export const invitationService = {
     // Ensure user exists (or create a placeholder if not yet in DB)
     let user = await UserModel.findOne({ clerkUserId: userClerkId });
     if (!user) {
-      // Create minimal user record – email is already known from invitation
-      user = await UserModel.create({
-        clerkUserId: userClerkId,
-        email: invitation.email,
-        name: invitation.email.split('@')[0],
-        avatarUrl: '',
-      });
+      try {
+        // Create minimal user record – email is already known from invitation
+        user = await UserModel.create({
+          clerkUserId: userClerkId,
+          email: invitation.email,
+          name: invitation.email.split('@')[0],
+          avatarUrl: '',
+        });
+      } catch (err: any) {
+        // Handle concurrent registration race condition (duplicate key error)
+        if (err && (err.code === 11000 || err.message?.includes("E11000"))) {
+          user = await UserModel.findOne({ clerkUserId: userClerkId });
+        }
+        if (!user) throw err;
+      }
     }
 
     // Add user to workspace members

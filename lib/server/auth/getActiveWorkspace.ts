@@ -27,10 +27,16 @@ export async function getActiveWorkspace(user: { _id: mongoose.Types.ObjectId | 
 
   if (workspace) {
     // Sync the cookie
-    cookieStore.set("workspaceId", workspace._id.toString(), {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 365, // 1 year
-    });
+    try {
+      cookieStore.set("workspaceId", workspace._id.toString(), {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365, // 1 year
+      });
+    } catch (e) {
+      // In Next.js App Router, cookies() cannot be modified in GET handlers or Server Components.
+      // We catch this to prevent crashing the request.
+      console.log("Unable to set workspaceId cookie in GET request or server component rendering context:", e);
+    }
     return workspace;
   }
 
