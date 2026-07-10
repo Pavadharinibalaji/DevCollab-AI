@@ -97,8 +97,9 @@ export function KanbanBoard() {
     // Fetch workspace details (members list)
     fetch("/api/workspace")
       .then((res) => res.json())
-      .then((data) => {
+      .then((payload) => {
         if (!active) return;
+        const data = payload.data || {};
         if (data.workspace) {
           setWorkspaceId(data.workspace._id);
           const membersList = (data.workspace.members || []).map((m: any) => {
@@ -117,9 +118,10 @@ export function KanbanBoard() {
     // Fetch projects
     fetch("/api/projects")
       .then((res) => res.json())
-      .then((data) => {
+      .then((payload) => {
         if (!active) return;
         setProjectsLoading(false);
+        const data = payload.data || {};
         if (data.projects && data.projects.length > 0) {
           setProjects(data.projects);
           setSelectedProjectId(data.projects[0]._id || data.projects[0].id);
@@ -142,7 +144,8 @@ export function KanbanBoard() {
 
     fetch(`/api/tasks?projectId=${selectedProjectId}`)
       .then((res) => res.json())
-      .then((data) => {
+      .then((payload) => {
+        const data = payload.data || { tasks: [] };
         const newTasks: Record<string, KanbanTask> = {};
         const newColumns: Record<KanbanColumnId, string[]> = {
           todo: [],

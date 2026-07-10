@@ -25,11 +25,13 @@ export async function GET() {
     const activeDoc = keyDocs.find((k) => k.isActive);
     if (activeDoc) {
       activeProvider = activeDoc.provider;
-    } else if (keyDocs.length > 0) {
-      // Auto-default first key to active
-      await UserKeyModel.updateOne({ _id: keyDocs[0]._id }, { $set: { isActive: true } });
-      activeProvider = keyDocs[0].provider;
     }
+
+    const workspaceProvider = (process.env.AI_PROVIDER || "gemini").toLowerCase();
+    const workspaceModel = workspaceProvider === "openai" ? "gpt-4o-mini" : "gemini-1.5-flash";
+    const workspaceConfigured = workspaceProvider === "openai" 
+      ? !!process.env.OPENAI_API_KEY 
+      : !!process.env.GEMINI_API_KEY;
 
     return NextResponse.json({
       success: true,
@@ -37,6 +39,10 @@ export async function GET() {
         hasKey: keyDocs.length > 0,
         activeProvider,
         savedProviders,
+        useOwnKey: !!activeProvider,
+        workspaceProvider,
+        workspaceModel,
+        workspaceConfigured,
       },
       error: null
     }, { status: 200 });

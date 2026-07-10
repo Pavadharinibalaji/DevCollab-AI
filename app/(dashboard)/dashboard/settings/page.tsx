@@ -34,6 +34,10 @@ export default function SettingsPage() {
   const [selectedProvider, setSelectedProvider] = useState<string>("openai");
   const [savedProviders, setSavedProviders] = useState<string[]>([]);
   const [activeProvider, setActiveProvider] = useState<string>("openai");
+  const [useOwnKey, setUseOwnKey] = useState<boolean>(false);
+  const [workspaceProvider, setWorkspaceProvider] = useState<string>("gemini");
+  const [workspaceModel, setWorkspaceModel] = useState<string>("gemini-1.5-flash");
+  const [workspaceConfigured, setWorkspaceConfigured] = useState<boolean>(false);
 
   // Form States
   const [wsName, setWsName] = useState("");
@@ -56,7 +60,8 @@ export default function SettingsPage() {
     try {
       const res = await fetch("/api/users/me");
       if (!res.ok) throw new Error("Failed to load user settings");
-      const data = await res.json();
+      const payload = await res.json();
+      const data = payload.data || {};
       
       setUser(data.user);
       setWorkspace(data.workspace);
@@ -70,15 +75,21 @@ export default function SettingsPage() {
       try {
         const keyRes = await fetch("/api/ai/check-key");
         if (keyRes.ok) {
-          const keyData = await keyRes.json();
+          const keyPayload = await keyRes.json();
+          const keyData = keyPayload.data || {};
           setHasKey(!!keyData?.hasKey);
           setSavedProviders(keyData?.savedProviders || []);
-          setActiveProvider(keyData?.activeProvider || "openai");
+          setActiveProvider(keyData?.activeProvider || "");
+          setUseOwnKey(!!keyData?.useOwnKey);
+          setWorkspaceProvider(keyData?.workspaceProvider || "gemini");
+          setWorkspaceModel(keyData?.workspaceModel || "gemini-1.5-flash");
+          setWorkspaceConfigured(!!keyData?.workspaceConfigured);
         }
       } catch {
         setHasKey(null);
         setSavedProviders([]);
-        setActiveProvider("openai");
+        setActiveProvider("");
+        setUseOwnKey(false);
       }
     } catch (err) {
       console.error(err);
@@ -118,11 +129,11 @@ export default function SettingsPage() {
         }),
       });
       
-      const data = await res.json();
+      const payload = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to update workspace settings");
+        throw new Error(payload.error || "Failed to update workspace settings");
       }
-      
+      const data = payload.data || {};
       setWorkspace(data.workspace);
       setSuccessMsg("Workspace settings updated successfully!");
       setTimeout(() => setSuccessMsg(""), 3000);
@@ -232,6 +243,35 @@ export default function SettingsPage() {
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch (err: any) {
       setErrorMsg(err.message || "Could not switch active provider");
+    }
+  };
+
+  const handleToggleUseOwnKey = async (val: boolean) => {
+    setUpdating(true);
+    setErrorMsg("");
+    setSuccessMsg("");
+    try {
+      const res = await fetch("/api/ai/set-active", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ useOwnKey: val }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to toggle setting");
+      }
+      setUseOwnKey(val);
+      if (val) {
+        setActiveProvider(data.data.activeProvider || "openai");
+      } else {
+        setActiveProvider("");
+      }
+      setSuccessMsg(val ? "Personal API key usage activated." : "Workspace default AI provider activated.");
+      setTimeout(() => setSuccessMsg(""), 3000);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to update AI settings");
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -598,128 +638,178 @@ export default function SettingsPage() {
                 <div>
                   <h3 className="text-lg font-bold text-foreground">AI Integration</h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Configure your own keys from multiple AI providers to enable project-aware assistance.
+                    Configure how DevCollab handles project-aware assistant requests.
                   </p>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  {/* Left Column: Manage Key */}
-                  <div className="p-5 border border-border/40 rounded-xl bg-card/20 space-y-4">
+                {/* Default Workspace Provider Card */}
+                <div className="p-5 border border-border/40 rounded-xl bg-card/20 space-y-4">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-9 w-9 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
                         <KeyRound className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-foreground">Manage API Keys</p>
+                        <p className="text-sm font-semibold text-foreground">Default DevCollab AI Provider</p>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
-                          Keys are encrypted and stored securely on our database.
+                          Powered by the workspace. No setup required.
                         </p>
                       </div>
                     </div>
-
-                    <form onSubmit={handleSaveApiKey} className="space-y-4 pt-2">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground">AI Provider</label>
-                        <select
-                          value={selectedProvider}
-                          onChange={(e) => setSelectedProvider(e.target.value)}
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                        >
-                          <option value="openai">OpenAI (GPT-4o-mini)</option>
-                          <option value="groq">Groq (Llama 3.3)</option>
-                          <option value="anthropic">Anthropic (Claude 3.5)</option>
-                          <option value="gemini">Google Gemini (Gemini 2.5)</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-foreground">API Key</label>
-                        <input
-                          type="password"
-                          value={apiKeyInput}
-                          onChange={(e) => setApiKeyInput(e.target.value)}
-                          placeholder={`Enter your ${selectedProvider.toUpperCase()} key`}
-                          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                        />
-                        {savedProviders.includes(selectedProvider) && (
-                          <p className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                            A key is already saved for this provider. Submitting will overwrite it.
-                          </p>
-                        )}
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={savingKey || !apiKeyInput.trim()}
-                        className="w-full px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
-                      >
-                        {savingKey && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                        Save & Activate Key
-                      </button>
-                    </form>
+                    <div>
+                      <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
+                        workspaceConfigured 
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+                          : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                      }`}>
+                        {workspaceConfigured ? "Configured" : "Not Configured"}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Right Column: Providers Status */}
-                  <div className="p-5 border border-border/40 rounded-xl bg-card/20 space-y-4 flex flex-col">
-                    <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Your Providers Status</p>
-
-                    <div className="space-y-3 flex-1">
-                      {[
-                        { id: "openai", name: "OpenAI", model: "gpt-4o-mini" },
-                        { id: "groq", name: "Groq", model: "llama-3.3" },
-                        { id: "anthropic", name: "Anthropic", model: "claude-3-5-sonnet" },
-                        { id: "gemini", name: "Gemini", model: "gemini-1.5-flash-latest" },
-                      ].map((provider) => {
-                        const isSaved = savedProviders.includes(provider.id);
-                        const isActive = activeProvider === provider.id;
-
-                        return (
-                          <div
-                            key={provider.id}
-                            className={`p-3 rounded-lg border flex items-center justify-between transition-all ${
-                              isActive
-                                ? "bg-indigo-600/5 border-indigo-500/30"
-                                : isSaved
-                                  ? "bg-muted/40 border-border/40"
-                                  : "bg-background/20 border-border/20 opacity-60"
-                            }`}
-                          >
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-foreground">{provider.name}</span>
-                                {isActive ? (
-                                  <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wide">
-                                    Active
-                                  </span>
-                                ) : isSaved ? (
-                                  <span className="px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-bold uppercase tracking-wide">
-                                    Saved
-                                  </span>
-                                ) : null}
-                              </div>
-                              <span className="text-[10px] text-muted-foreground mt-0.5 block">
-                                Model: <code className="text-foreground/80 font-mono text-[9px] bg-muted px-1 py-0.5 rounded">{provider.model}</code>
-                              </span>
-                            </div>
-
-                            {isSaved && !isActive && (
-                              <button
-                                onClick={() => handleSetActiveProvider(provider.id)}
-                                className="px-2.5 py-1 text-[10px] font-bold rounded bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all cursor-pointer"
-                              >
-                                Activate
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
+                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/20 text-xs">
+                    <div>
+                      <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Active Provider</span>
+                      <span className="font-bold text-foreground capitalize mt-0.5 block">{workspaceProvider}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Current Model</span>
+                      <code className="text-foreground/80 font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded mt-0.5 inline-block">{workspaceModel}</code>
                     </div>
                   </div>
                 </div>
 
+                {/* Toggle Section */}
+                <div className="p-5 border border-border/40 rounded-xl bg-card/20 flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-foreground">Use my own API Key</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Enable to override workspace provider defaults with your personal credentials.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={useOwnKey}
+                      onChange={(e) => handleToggleUseOwnKey(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-10 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+
+                {/* Collapsible Advanced Settings (Existing API Key Management UI) */}
+                {useOwnKey && (
+                  <div className="space-y-6 p-5 border border-border/40 rounded-xl bg-card/10 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Advanced Settings</h4>
+                    <div className="grid gap-6 md:grid-cols-2">
+                      {/* Left Column: Manage Key */}
+                      <div className="space-y-4">
+                        <form onSubmit={handleSaveApiKey} className="space-y-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-foreground">AI Provider</label>
+                            <select
+                              value={selectedProvider}
+                              onChange={(e) => setSelectedProvider(e.target.value)}
+                              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            >
+                              <option value="openai">OpenAI (GPT-4o-mini)</option>
+                              <option value="groq">Groq (Llama 3.3)</option>
+                              <option value="anthropic">Anthropic (Claude 3.5)</option>
+                              <option value="gemini">Google Gemini (Gemini 2.5)</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-foreground">API Key</label>
+                            <input
+                              type="password"
+                              value={apiKeyInput}
+                              onChange={(e) => setApiKeyInput(e.target.value)}
+                              placeholder={`Enter your ${selectedProvider.toUpperCase()} key`}
+                              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                            />
+                            {savedProviders.includes(selectedProvider) && (
+                              <p className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                                A key is already saved for this provider. Submitting will overwrite it.
+                              </p>
+                            )}
+                          </div>
+
+                          <button
+                            type="submit"
+                            disabled={savingKey || !apiKeyInput.trim()}
+                            className="w-full px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+                          >
+                            {savingKey && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                            Save & Activate Key
+                          </button>
+                        </form>
+                      </div>
+
+                      {/* Right Column: Providers Status */}
+                      <div className="space-y-3 flex flex-col">
+                        <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Your Providers Status</p>
+
+                        <div className="space-y-3 flex-1">
+                          {[
+                            { id: "openai", name: "OpenAI", model: "gpt-4o-mini" },
+                            { id: "groq", name: "Groq", model: "llama-3.3" },
+                            { id: "anthropic", name: "Anthropic", model: "claude-3-5-sonnet" },
+                            { id: "gemini", name: "Gemini", model: "gemini-1.5-flash-latest" },
+                          ].map((provider) => {
+                            const isSaved = savedProviders.includes(provider.id);
+                            const isActive = activeProvider === provider.id;
+
+                            return (
+                              <div
+                                key={provider.id}
+                                className={`p-3 rounded-lg border flex items-center justify-between transition-all ${
+                                  isActive
+                                    ? "bg-indigo-600/5 border-indigo-500/30"
+                                    : isSaved
+                                      ? "bg-muted/40 border-border/40"
+                                      : "bg-background/20 border-border/20 opacity-60"
+                                }`}
+                              >
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-foreground">{provider.name}</span>
+                                    {isActive ? (
+                                      <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wide">
+                                        Active
+                                      </span>
+                                    ) : isSaved ? (
+                                      <span className="px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-bold uppercase tracking-wide">
+                                        Saved
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                  <span className="text-[10px] text-muted-foreground mt-0.5 block">
+                                    Model: <code className="text-foreground/80 font-mono text-[9px] bg-muted px-1 py-0.5 rounded">{provider.model}</code>
+                                  </span>
+                                </div>
+
+                                {isSaved && !isActive && (
+                                  <button
+                                    onClick={() => handleSetActiveProvider(provider.id)}
+                                    className="px-2.5 py-1 text-[10px] font-bold rounded bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all cursor-pointer"
+                                  >
+                                    Activate
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="p-4 bg-indigo-950/10 border border-indigo-500/15 rounded-lg text-[11px] text-indigo-300 leading-relaxed">
-                  💡 **Pro Tip:** You can configure keys for multiple providers and easily toggle between them using the &quot;Activate&quot; buttons. The Agent sidebar will dynamically use your active provider for all chat interactions with full project context.
+                  💡 **Pro Tip:** Toggle &quot;Use my own API key&quot; if you have personal keys you wish to use instead of the default workspace provider. Personal keys are saved securely and encrypted.
                 </div>
               </div>
             )}

@@ -13,16 +13,32 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const provider = String(body?.provider || "").trim() as UserKeyProvider;
-
-    const validProviders = USER_KEY_PROVIDERS as unknown as string[];
-    if (!validProviders.includes(provider)) {
-      return NextResponse.json({ success: false, data: null, error: "Unsupported provider" }, { status: 400 });
-    }
+    const useOwnKey = body?.useOwnKey;
 
     const conn = await connectMongoose();
     if (!conn) {
       return NextResponse.json({ success: false, data: null, error: "Database connection failed" }, { status: 500 });
+    }
+
+    if (useOwnKey !== undefined) {
+      if (useOwnKey === false) {
+        await UserKeyModel.updateMany({ userId: String(user._id) }, { $set: { isActive: false } });
+        return NextResponse.json({ success: true, data: { useOwnKey: false, activeProvider: null }, error: null }, { status: 200 });
+      } else {
+        const firstKey = await UserKeyModel.findOne({ userId: String(user._id) });
+        if (!firstKey) {
+          return NextResponse.json({ success: false, data: null, error: "Please configure at least one API key first." }, { status: 400 });
+        }
+        await UserKeyModel.updateMany({ userId: String(user._id) }, { $set: { isActive: false } });
+        await UserKeyModel.updateOne({ _id: firstKey._id }, { $set: { isActive: true } });
+        return NextResponse.json({ success: true, data: { useOwnKey: true, activeProvider: firstKey.provider }, error: null }, { status: 200 });
+      }
+    }
+
+    const provider = String(body?.provider || "").trim() as UserKeyProvider;
+    const validProviders = USER_KEY_PROVIDERS as unknown as string[];
+    if (!validProviders.includes(provider)) {
+      return NextResponse.json({ success: false, data: null, error: "Unsupported provider" }, { status: 400 });
     }
 
     // Verify key exists for this provider

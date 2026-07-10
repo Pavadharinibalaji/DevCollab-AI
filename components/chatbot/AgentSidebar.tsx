@@ -74,10 +74,11 @@ export default function AgentSidebar() {
           if (!cancelled) setHasKey(false);
           return;
         }
-        const data = await res.json();
+        const payload = await res.json();
         if (!cancelled) {
-          setHasKey(!!data?.hasKey);
-          setActiveProvider(data?.activeProvider || "");
+          const data = payload.data || {};
+          setHasKey(!!data.hasKey);
+          setActiveProvider(data.activeProvider || "");
         }
       } catch {
         if (!cancelled) setHasKey(false);
@@ -148,9 +149,10 @@ export default function AgentSidebar() {
         return;
       }
 
-      const data = await response.json();
+      const payload = await response.json();
+      const data = payload.data || {};
       const replyText =
-        String(data?.reply || "").trim() || "I did not get a response. Please try again.";
+        String(data.reply || "").trim() || "I did not get a response. Please try again.";
 
       setMessages((prev) => {
         const updated = [...prev];

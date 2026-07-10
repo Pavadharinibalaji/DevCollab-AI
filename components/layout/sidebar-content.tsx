@@ -51,7 +51,8 @@ export function SidebarContent({ onNavigate, className }: SidebarContentProps) {
   useEffect(() => {
     fetch("/api/workspace")
       .then((res) => res.json())
-      .then((data) => {
+      .then((payload) => {
+        const data = payload.data || {};
         if (data.workspace) setWorkspace(data.workspace);
         if (data.metrics) setMetrics(data.metrics);
       })

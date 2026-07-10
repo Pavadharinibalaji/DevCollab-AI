@@ -1,4 +1,3 @@
-/// <reference types="react" />
 import React, { type ReactNode } from "react";
 
 export default function AuthLayout({

@@ -52,23 +52,26 @@ export function TaskDetailsModal({
     try {
       const res = await fetch(`/api/tasks/${taskId}`);
       if (!res.ok) throw new Error("Failed to fetch task details");
-      const data = await res.json();
+      const payload = await res.json();
+      const data = payload.data || {};
       setTask(data.task);
       setActivities(data.activities || []);
 
       // Set form fields
-      setTitle(data.task.title || "");
-      setDescription(data.task.description || "");
-      setStatus(data.task.status || "todo");
-      setPriority(data.task.priority || "medium");
-      setAssigneeId(
-        data.task.assigneeId && typeof data.task.assigneeId === "object"
-          ? data.task.assigneeId._id || data.task.assigneeId.id
-          : data.task.assigneeId || ""
-      );
-      setDueDate(
-        data.task.dueDate ? new Date(data.task.dueDate).toISOString().split("T")[0] : ""
-      );
+      if (data.task) {
+        setTitle(data.task.title || "");
+        setDescription(data.task.description || "");
+        setStatus(data.task.status || "todo");
+        setPriority(data.task.priority || "medium");
+        setAssigneeId(
+          data.task.assigneeId && typeof data.task.assigneeId === "object"
+            ? data.task.assigneeId._id || data.task.assigneeId.id
+            : data.task.assigneeId || ""
+        );
+        setDueDate(
+          data.task.dueDate ? new Date(data.task.dueDate).toISOString().split("T")[0] : ""
+        );
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to load task details");

@@ -79,7 +79,8 @@ export default function TeamPage() {
     try {
       const response = await fetch('/api/workspace');
       if (!response.ok) throw new Error('Failed to fetch workspace data');
-      const data = await response.json();
+      const payload = await response.json();
+      const data = payload.data || {};
       const ws = data.workspace;
       
       const workspaceUsers = ws?.members?.map((m: any) => {
@@ -125,8 +126,9 @@ export default function TeamPage() {
       if (inviteRes.ok) {
         const result = await inviteRes.json();
         if (result.success) {
-          setInviteResent(!!result.resent);
-          setGeneratedToken(result.invitation?.token || "");
+          const resData = result.data || {};
+          setInviteResent(!!resData.resent);
+          setGeneratedToken(resData.invitation?.token || "");
           setInviteSuccess(true);
           setInviteEmail("");
           await fetchData();

@@ -56,7 +56,8 @@ export default function ProjectsPage() {
     // Fetch workspace members for assignee mapping
     fetch("/api/workspace")
       .then((res) => res.json())
-      .then((data) => {
+      .then((payload) => {
+        const data = payload.data || {};
         if (data.workspace) {
           const list = (data.workspace.members || []).map((m: any) => {
             const u = m.userId;

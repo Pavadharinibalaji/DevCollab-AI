@@ -29,11 +29,11 @@ export default function InviteAcceptancePage() {
     const fetchInfo = async () => {
       try {
         const res = await fetch(`/api/invitations/${token}`);
-        const data = await res.json();
+        const payload = await res.json();
         if (!res.ok) {
-          throw new Error(data.error || "Failed to fetch invitation details.");
+          throw new Error(payload.error || "Failed to fetch invitation details.");
         }
-        setInvitationInfo(data.invitation);
+        setInvitationInfo(payload.data?.invitation);
       } catch (err: any) {
         console.error("Fetch invite error:", err);
         setInfoError(err.message || "Invalid or expired invitation link.");

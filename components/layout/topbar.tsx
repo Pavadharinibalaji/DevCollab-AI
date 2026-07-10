@@ -3,6 +3,7 @@
 import { Bell, Menu, Search } from "lucide-react";
 import Link from "next/link";
 import { Show, UserButton } from "@clerk/nextjs";
+import { clerkTheme } from "@/lib/clerk-theme";
 
 import { Button } from "@/components/ui/button";
 import { buttonClassName } from "@/components/ui/button";
@@ -57,7 +58,9 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         <Show when="signed-in">
           <UserButton
             appearance={{
+              ...clerkTheme,
               elements: {
+                ...clerkTheme.elements,
                 userButtonAvatarBox: "h-8 w-8",
               },
             }}
